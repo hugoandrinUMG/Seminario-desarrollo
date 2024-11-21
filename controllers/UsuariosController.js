@@ -212,6 +212,11 @@ exports.enviarCorreoRestablecimiento = async (req, res) => {
         // Generar un token único (opcional, para el enlace)
         const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
  
+        // Determinar la URL base según el entorno
+        const baseUrl = process.env.NODE_ENV === 'production' 
+            ? 'https://seminario-desarrollo-backend.onrender.com'
+            : 'http://localhost:3000';
+ 
         // Enviar correo con el enlace de restablecimiento
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
@@ -220,13 +225,14 @@ exports.enviarCorreoRestablecimiento = async (req, res) => {
             html: `
 <p>Hola, ${usuario.nombre},</p>
 <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-<a href="http://localhost:3000/reset-password/${token}">Restablecer Contraseña</a>
+<a href="${baseUrl}/reset-password/${token}">Restablecer Contraseña</a>
 <p>Este enlace expirará en 1 hora.</p>
             `,
         });
  
         res.status(200).json({ message: 'Correo de restablecimiento enviado.' });
     } catch (error) {
+        console.error('Error al enviar el correo:', error);
         res.status(500).json({ message: 'Error al enviar el correo.' });
     }
 };
