@@ -37,21 +37,41 @@ const UsuarioModel = {
 },
 
 guardarTokenRestablecimiento: async (id, token, expiracion) => {
-  await pool.query('UPDATE usuarios SET token_restablecimiento = $1, expiracion_token = $2 WHERE id = $3', [token, expiracion, id]);
-},
-
-obtenerPorToken: async (token) => {
-  const result = await pool.query('SELECT * FROM usuarios WHERE token_restablecimiento = $1', [token]);
-  return result.rows[0];
-},
-
-actualizarContrasena: async (id, contrasena) => {
+  await pool.query(
+  'UPDATE usuarios SET token_restablecimiento = $1, expiracion_token = $2 WHERE id = $3',
+        [token, expiracion, id]
+      );
+    },
+   
+    /**    
+     *Obtener un usuario por su token de restablecimiento.   
+     * @param {string} token - El token de restablecimiento.    
+     * @returns {Promise<object|null>} - Usuario si se encuentra, null si no. 
+     */
+    
+     obtenerPorToken: async (token) => {
+  try {
+  const result = await pool.query(
+  'SELECT * FROM usuarios WHERE token_restablecimiento = $1 AND expiracion_token > NOW()',
+          [token]
+        );
+  return result.rows[0] || null; // Retorna null si no hay resultados
+      } catch (error) {
+        console.error('Error al buscar usuario por token:', error);
+  throw error; // Lanzar el error para manejarlo en el controlador
+      }
+    },
+   
+    actualizarContrasena: async (id, contrasena) => {
   await pool.query('UPDATE usuarios SET contrasena = $1 WHERE id = $2', [contrasena, id]);
-},
-
-eliminarTokenRestablecimiento: async (id) => {
-  await pool.query('UPDATE usuarios SET token_restablecimiento = NULL, expiracion_token = NULL WHERE id = $1', [id]);
-},
+    },
+   
+    eliminarTokenRestablecimiento: async (id) => {
+  await pool.query(
+  'UPDATE usuarios SET token_restablecimiento = NULL, expiracion_token = NULL WHERE id = $1',
+        [id]
+      );
+    },
 
 
 };

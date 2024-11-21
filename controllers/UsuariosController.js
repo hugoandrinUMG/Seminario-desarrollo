@@ -279,19 +279,21 @@ exports.generarTokenRestablecimiento = async (req, res) => {
 // Validar token y permitir restablecimiento
 exports.validarTokenRestablecimiento = async (req, res) => {
     try {
-        const { token } = req.query;
- 
-        // Verificar si el token es válido
-        const usuario = await Usuario.obtenerPorToken(token);
-        if (!usuario || usuario.expiracion_token < new Date()) {
-            return res.status(400).json({ message: 'Token inválido o expirado.' });
+    const { token } = req.query;
+     
+        // Usar el método del modelo para obtener el usuario por tokenconst usuario = awaitUsuario.obtenerPorToken(token);
+     
+        if (!usuario) {
+    return res.status(400).json({ message: 'Token inválido o expirado.' });
         }
- 
+     
         res.status(200).json({ message: 'Token válido. Permitir cambio de contraseña.' });
-    } catch (error) {
+      } catch (error) {
+        console.error('Error al validar token:', error);
         res.status(500).json({ message: 'Error al validar el token.' });
-    }
-};
+      }
+    };
+
  
 // Restablecer contraseña
 exports.restablecerContrasena = async (req, res) => {

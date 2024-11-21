@@ -4,9 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>API Test</title>
+<style>
+        #authForm, #mainContent {
+            display: none;
+        }
+        #authForm.active, #mainContent.active {
+            display: block;
+        }
+</style>
 </head>
 <body>
+<!-- Formulario de autenticación -->
+<div id="authForm" class="active">
+<h1>Autenticación Requerida</h1>
+<form id="loginForm">
+<input type="text" id="username" placeholder="Usuario" required />
+<input type="password" id="password" placeholder="Contraseña" required />
+<button type="submit">Iniciar Sesión</button>
+</form>
+<p id="loginError" style="color: red; display: none;">Usuario o contraseña incorrectos.</p>
+</div>
+ 
+    <!-- Contenido principal (API Test) -->
+<div id="mainContent">
 <h1>Test API Endpoints</h1>
+ 
+        <!-- Crear Usuario -->
 <h2>Create User</h2>
 <form id="createUserForm">
 <input type="text" id="name" placeholder="Name" required />
@@ -15,102 +38,191 @@
 <input type="text" id="rol" placeholder="Role" required />
 <button type="submit">Create User</button>
 </form>
+ 
+        <!-- Obtener Usuarios -->
 <h2>Get All Users</h2>
 <button id="getAllUsers">Get Users</button>
-
-
-<script>
-    // URLs del backend
-    const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api';
-    const localApiBaseUrl = 'http://localhost:3000/api';
+<ul id="usersList"></ul>
  
-    // Función que agrega un timeout a fetch
-    async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        <!-- Actualizar Usuario -->
+<h2>Update User</h2>
+<form id="updateUserForm">
+<input type="number" id="updateId" placeholder="User ID" required />
+<input type="text" id="updateName" placeholder="Name" />
+<input type="email" id="updateEmail" placeholder="Email" />
+<input type="password" id="updateContrasena" placeholder="Password" />
+<input type="text" id="updateRol" placeholder="Role" />
+<button type="submit">Update User</button>
+</form>
  
-        try {
-            const response = await fetch(resource, { ...options, signal: controller.signal });
-            clearTimeout(timeoutId); // Limpiar el temporizador si la respuesta llega antes
-            return response;
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                throw new Error('Tiempo de espera agotado para la solicitud.');
-            }
-            throw error;
-        }
-    }
+        <!-- Eliminar Usuario -->
+<h2>Delete User</h2>
+<form id="deleteUserForm">
+<input type="number" id="deleteId" placeholder="User ID" required />
+<button type="submit">Delete User</button>
+</form>
+</div>
  
-    // Función para realizar una solicitud a ambos entornos
-    async function makeRequest(path, options) {
-        try {
-            // Intentar con la API en producción
-            const response = await fetchWithTimeout(`${productionApiBaseUrl}${path}`, options);
-            return response;
-        } catch (error) {
-            console.warn('Fallo en la API en producción, intentando con el servidor local:', error.message);
-            // Intentar con la API local
-            const response = await fetch(`${localApiBaseUrl}${path}`, options);
-            return response;
-        }
-    }
+    <script>
+        // Credenciales de autenticación
+        const validUsername = 'hugoandrin';
+        const validPassword = 'Half-life21995';
  
-    // Handle Create User form submission
-    document.getElementById('createUserForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const nombre = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const contrasena = document.getElementById('contrasena').value;
-        const rol = document.getElementById('rol').value;
+        // Elementos del DOM
+        const authForm = document.getElementById('authForm');
+        const mainContent = document.getElementById('mainContent');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
  
-        try {
-            const response = await makeRequest('/usuarios', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, email, contrasena, rol }),
-            });
+        // Manejar inicio de sesión
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
  
-            const data = await response.json();
-            if (response.ok) {
-                console.log('Usuario creado:', data);
-                alert('Usuario creado exitosamente');
+            if (username === validUsername && password === validPassword) {
+                authForm.classList.remove('active');
+                mainContent.classList.add('active');
             } else {
-                console.error('Error al crear usuario:', data.message || response.statusText);
-                alert(`Error al crear usuario: ${data.message || 'Error desconocido'}`);
+                loginError.style.display = 'block';
             }
-        } catch (error) {
-            console.error('Error en la conexión:', error.message);
-            alert('No se pudo conectar al servidor.');
+        });
+ 
+        // URLs del backend
+        const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api';
+        const localApiBaseUrl = 'http://localhost:3000/api';
+ 
+        // Función que agrega un timeout a fetch
+        async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(resource, { ...options, signal: controller.signal });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Tiempo de espera agotado para la solicitud.');
+                }
+                throw error;
+            }
         }
-    });
  
-    // Handle Get All Users button click
-    document.getElementById('getAllUsers').addEventListener('click', async () => {
-        try {
-            const response = await makeRequest('/usuarios');
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Usuarios obtenidos:', data);
+        // Función para realizar una solicitud a ambos entornos
+        async function makeRequest(path, options) {
+            try {
+                const response = await fetchWithTimeout(`${productionApiBaseUrl}${path}`, options);
+                return response;
+            } catch (error) {
+                console.warn('Fallo en la API en producción, intentando con el servidor local:', error.message);
+                const response = await fetch(`${localApiBaseUrl}${path}`, options);
+                return response;
+            }
+        }
  
-                // Mostrar los usuarios en el HTML
-                const usersList = document.createElement('ul');
-                data.forEach(usuario => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `Nombre: ${usuario.nombre}, Email: ${usuario.email}, Rol: ${usuario.rol}`;
-                    usersList.appendChild(listItem);
+        // Crear usuario
+        document.getElementById('createUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const nombre = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const contrasena = document.getElementById('contrasena').value;
+            const rol = document.getElementById('rol').value;
+ 
+            try {
+                const response = await makeRequest('/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email, contrasena, rol }),
                 });
-                document.body.appendChild(usersList);
-            } else {
-                console.error('Error al obtener usuarios:', response.statusText);
-                alert('Error al obtener usuarios.');
+ 
+                const data = await response.json();
+                if (response.ok) {
+                    console.log('Usuario creado:', data);
+                    alert('Usuario creado exitosamente');
+                } else {
+                    alert(`Error al crear usuario: ${data.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                alert('No se pudo conectar al servidor.');
             }
-        } catch (error) {
-            console.error('Error en la conexión:', error.message);
-            alert('No se pudo conectar al servidor.');
-        }
-    });
+        });
+ 
+        // Obtener usuarios
+        document.getElementById('getAllUsers').addEventListener('click', async () => {
+            try {
+                const response = await makeRequest('/usuarios');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Usuarios obtenidos:', data);
+ 
+                    const usersList = document.getElementById('usersList');
+                    usersList.innerHTML = ''; // Limpiar lista existente
+                    data.forEach(usuario => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `
+                            ID: ${usuario.id}, 
+                            Nombre: ${usuario.nombre}, 
+                            Email: ${usuario.email}, 
+                            Rol: ${usuario.rol}, 
+                            Token: ${usuario.token_restablecimiento || 'N/A'}, 
+                            Expiración: ${usuario.expiracion_token || 'N/A'}
+                        `;
+                        usersList.appendChild(listItem);
+                    });
+                } else {
+                    alert('Error al obtener usuarios.');
+                }
+            } catch (error) {
+                alert('No se pudo conectar al servidor.');
+            }
+        });
+ 
+        // Actualizar usuario
+        document.getElementById('updateUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('updateId').value;
+            const nombre = document.getElementById('updateName').value;
+            const email = document.getElementById('updateEmail').value;
+            const contrasena = document.getElementById('updateContrasena').value;
+            const rol = document.getElementById('updateRol').value;
+ 
+            try {
+                const response = await makeRequest(`/usuarios/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email, contrasena, rol }),
+                });
+ 
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Usuario actualizado exitosamente');
+                } else {
+                    alert(`Error al actualizar usuario: ${data.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                alert('No se pudo conectar al servidor.');
+            }
+        });
+ 
+        // Eliminar usuario
+        document.getElementById('deleteUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('deleteId').value;
+ 
+            try {
+                const response = await makeRequest(`/usuarios/${id}`, {
+                    method: 'DELETE',
+                });
+ 
+                if (response.ok) {
+                    alert('Usuario eliminado exitosamente');
+                } else {
+                    alert('Error al eliminar usuario.');
+                }
+            } catch (error) {
+                alert('No se pudo conectar al servidor.');
+            }
+        });
 </script>
-
-
 </body>
 </html>

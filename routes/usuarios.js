@@ -1,40 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { crearUsuario, obtenerUsuarios, obtenerUsuarioPorId, actualizarUsuario, eliminarUsuario} = require('../controllers/UsuariosController');
 const UsuariosController = require('../controllers/UsuariosController'); 
 const { autenticarUsuario } = require('../controllers/UsuariosController');
+const { crearUsuario, obtenerUsuarios, obtenerUsuarioPorId, actualizarUsuario, eliminarUsuario} = require('../controllers/UsuariosController');
  
-// Ruta para crear un usuario
-router.post('/', crearUsuario);
-
-// Ruta para crear múltiples usuarios
-router.post('/crear-multiples', UsuariosController.crearUsuarios);
+// Rutas para usuarios
+router.post('/', UsuariosController.crearUsuario); // Crear un usuario
+router.post('/crear-multiples', UsuariosController.crearUsuarios); // Crear múltiples usuarios
+router.get('/', UsuariosController.obtenerUsuarios); // Obtener todos los usuarios
+router.get('/:id', UsuariosController.obtenerUsuarioPorId); // Obtener un usuario por ID
+router.put('/:id', UsuariosController.actualizarUsuario); // Actualizar un usuario
+router.delete('/:id', UsuariosController.eliminarUsuario); // Eliminar un usuario
  
-// Ruta para obtener todos los usuarios
-router.get('/', obtenerUsuarios);
+// Ruta para autenticación (login)
+router.post('/login', UsuariosController.autenticarUsuario);
  
-// Ruta para obtener un usuario por ID
-router.get('/:id', obtenerUsuarioPorId);
- 
-// Ruta para actualizar un usuario
-router.put('/:id', actualizarUsuario);
- 
-// Ruta para eliminar un usuario
-router.delete('/:id', eliminarUsuario);
-
-// Ruta para login
-router.post('/login', autenticarUsuario);
-
-// Ruta para el envio de correos
-//router.post('/reset-password', UsuariosController.enviarCorreoRestablecimiento);
-
-// Enviar correo de restablecimiento
-router.post('/enviar-correo-restablecimiento', UsuariosController.enviarCorreoRestablecimiento);
- 
-// Validar token
-router.get('/validar-token', UsuariosController.validarTokenRestablecimiento);
- 
-// Restablecer contraseña
-router.post('/reset-password', UsuariosController.restablecerContrasena);
+// Rutas para restablecimiento de contraseñas
+router.post('/reset-password', UsuariosController.enviarCorreoRestablecimiento); // Enviar correo de restablecimiento
+router.get('/validar-token', UsuariosController.validarTokenRestablecimiento); // Validar token de restablecimiento
+router.post('/restablecer-contrasena', UsuariosController.restablecerContrasena); // Restablecer contraseña
  
 module.exports = router;
