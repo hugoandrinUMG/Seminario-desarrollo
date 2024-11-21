@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+ 
+    .dashboard-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+ 
+    .dashboard-container h1 {
+      margin-bottom: 20px;
+    }
+ 
+    .dashboard-container button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+ 
+    .dashboard-container button:hover {
+      background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+<div class="dashboard-container">
+<h1>Bienvenido al Dashboard</h1>
+<p>Has iniciado sesión exitosamente.</p>
+<button id="logoutBtn">Cerrar Sesión</button>
+</div>
+ 
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      // Eliminar token de sesión del almacenamiento local (si se usa)
+      localStorage.removeItem('token');
+ 
+      // Redirigir al index.html
+      window.location.href = 'home.html';
+    });
+ 
+    // Verificar si el usuario está autenticado
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Si no hay token, redirigir al index.html
+        window.location.href = 'home.html';
+      }
+    });
+</script>
+</body>
+</html>
