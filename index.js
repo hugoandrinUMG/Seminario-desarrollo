@@ -27,15 +27,22 @@ app.get('/', (req, res) => {
 //});
 
 // Ruta de prueba para /api
-//app.get('/api', (req, res) => {
-//  res.send('Ruta /api funcionando');
-//});
+app.get('/api', (req, res) => {
+  res.send('Ruta /api funcionando');
+});
 
+
+// Cambia 'https://seminario-desarrollo-backend.onrender.com' por tu dominio si es diferente
+app.use(cors({
+  origin: 'https://seminario-desarrollo-backend.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+  credentials: true // Permite cookies si las usas
+}));
 
 
 // Importar y usar la ruta de usuariosconst usuariosRoutes = require('./routes/usuarios');
-//console.log('usuariosRoutes importado:', usuariosRoutes); // Línea de verificación
-//app.use('/api/usuarios', usuariosRoutes);
+console.log('usuariosRoutes importado:', usuariosRoutes); // Línea de verificación
+app.use('/api/usuarios', usuariosRoutes);
 
 //Verificar que BD estamos usando
 pool.query('SELECT current_database()', (err, res) => {
