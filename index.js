@@ -26,6 +26,10 @@ app.get('/api', (req, res) => {
   res.send('Ruta /api funcionando');
 });
 
+// Ruta raíz redirige al archivo home.html
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/home.html');
+});
 
 // Importar y usar la ruta de usuariosconst usuariosRoutes = require('./routes/usuarios');
 console.log('usuariosRoutes importado:', usuariosRoutes); // Línea de verificación
