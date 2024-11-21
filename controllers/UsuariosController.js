@@ -238,8 +238,6 @@ exports.enviarCorreoRestablecimiento = async (req, res) => {
 };
 
 
-
-
 // Generar token y enviar correo
 exports.generarTokenRestablecimiento = async (req, res) => {
     try {
@@ -258,15 +256,25 @@ exports.generarTokenRestablecimiento = async (req, res) => {
         // Guardar token en la base de datos
         await Usuario.guardarTokenRestablecimiento(usuario.id, token, expiracion);
  
+        // Determinar la URL base según el entorno
+        const baseUrl = process.env.NODE_ENV === 'production'
+            ? 'https://seminario-desarrollo-backend.onrender.com'
+            : 'http://localhost:3000';
+ 
         // Enviar correo con el enlace de restablecimiento
-        const enlace = `http://localhost:3000/reset_password?token=${token}`;
+        const enlace = `${baseUrl}/reset-password?token=${token}`;
         await enviarCorreo(email, 'Restablecimiento de contraseña', `Haz clic en el siguiente enlace para restablecer tu contraseña: ${enlace}`);
  
         res.status(200).json({ message: 'Correo de restablecimiento enviado.' });
     } catch (error) {
+        console.error('Error en generarTokenRestablecimiento:', error);
         res.status(500).json({ message: 'Error al procesar la solicitud.' });
     }
 };
+
+
+
+
  
 // Validar token y permitir restablecimiento
 exports.validarTokenRestablecimiento = async (req, res) => {

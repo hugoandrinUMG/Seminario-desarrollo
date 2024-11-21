@@ -26,6 +26,15 @@ router.delete('/:id', eliminarUsuario);
 router.post('/login', autenticarUsuario);
 
 // Ruta para el envio de correos
-router.post('/reset-password', UsuariosController.enviarCorreoRestablecimiento);
+//router.post('/reset-password', UsuariosController.enviarCorreoRestablecimiento);
+
+// Enviar correo de restablecimiento
+router.post('/enviar-correo-restablecimiento', UsuariosController.enviarCorreoRestablecimiento);
+ 
+// Validar token
+router.get('/validar-token', UsuariosController.validarTokenRestablecimiento);
+ 
+// Restablecer contraseña
+router.post('/reset-password', UsuariosController.restablecerContrasena);
  
 module.exports = router;

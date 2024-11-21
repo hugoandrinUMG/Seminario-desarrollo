@@ -60,3 +60,7 @@ app.listen(port, () => {
   //console.log(process.env.JWT_SECRET); // solo para test eliminar luego
 });
 
+app.get('/reset-password', (req, res) => {
+  res.sendFile(__dirname + '/public/reset_password_form.html');
+});
+

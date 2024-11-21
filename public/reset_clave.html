@@ -57,21 +57,18 @@
 </form>
 </div>
 </div>
-
-
+ 
 <script>
-    // URLs del backend
     const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api';
     const localApiBaseUrl = 'http://localhost:3000/api';
  
-    // Función que agrega un timeout a fetch
     async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
  
         try {
             const response = await fetch(resource, { ...options, signal: controller.signal });
-            clearTimeout(timeoutId); // Limpiar el temporizador si la respuesta llega antes
+            clearTimeout(timeoutId);
             return response;
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -91,7 +88,6 @@
         errorMessage.classList.add('d-none');
  
         try {
-            // Intentar con la API en producción con un timeout de 3 segundos
             const response = await fetchWithTimeout(`${productionApiBaseUrl}/usuarios/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -107,14 +103,10 @@
                 const data = await response.json();
                 errorMessage.textContent = data.message || 'Error desconocido.';
                 errorMessage.classList.remove('d-none');
-                setTimeout(() => {
-                    window.location.href = 'home.html';
-                }, 5000);
             }
         } catch (error) {
             console.warn('Fallo en la API en producción, intentando con el servidor local:', error.message);
  
-            // Intentar con el servidor local
             try {
                 const response = await fetch(`${localApiBaseUrl}/usuarios/reset-password`, {
                     method: 'POST',
@@ -131,21 +123,15 @@
                     const data = await response.json();
                     errorMessage.textContent = data.message || 'Error desconocido.';
                     errorMessage.classList.remove('d-none');
-                    setTimeout(() => {
-                        window.location.href = 'home.html';
-                    }, 5000);
                 }
             } catch (localError) {
                 errorMessage.textContent = 'Error al conectar con el servidor.';
                 errorMessage.classList.remove('d-none');
-                setTimeout(() => {
-                    window.location.href = 'home.html';
-                }, 5000);
+                console.error('Fallo en el servidor local:', localError.message);
             }
         }
     });
 </script>
-
-
+ 
 </body>
 </html>
