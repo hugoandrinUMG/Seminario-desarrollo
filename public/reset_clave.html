@@ -57,24 +57,46 @@
 </form>
 </div>
 </div>
+
+
 <script>
-    const apiBaseUrl = 'http://localhost:3000/api';
+    // URLs del backend
+    const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api';
+    const localApiBaseUrl = 'http://localhost:3000/api';
+ 
+    // Función que agrega un timeout a fetch
+    async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+ 
+        try {
+            const response = await fetch(resource, { ...options, signal: controller.signal });
+            clearTimeout(timeoutId); // Limpiar el temporizador si la respuesta llega antes
+            return response;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Tiempo de espera agotado para la solicitud.');
+            }
+            throw error;
+        }
+    }
  
     document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
         event.preventDefault();
         const email = document.getElementById('email').value;
  
+        const successMessage = document.getElementById('success-message');
+        const errorMessage = document.getElementById('error-message');
+        successMessage.classList.add('d-none');
+        errorMessage.classList.add('d-none');
+ 
         try {
-            const response = await fetch(`${apiBaseUrl}/usuarios/reset-password`, {
+            // Intentar con la API en producción con un timeout de 3 segundos
+            const response = await fetchWithTimeout(`${productionApiBaseUrl}/usuarios/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email }),
             });
- 
-            const successMessage = document.getElementById('success-message');
-            const errorMessage = document.getElementById('error-message');
-            successMessage.classList.add('d-none');
-            errorMessage.classList.add('d-none');
  
             if (response.ok) {
                 successMessage.classList.remove('d-none');
@@ -90,14 +112,40 @@
                 }, 5000);
             }
         } catch (error) {
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.textContent = 'Error al conectar con el servidor.';
-            errorMessage.classList.remove('d-none');
-            setTimeout(() => {
-                window.location.href = 'home.html';
-            }, 5000);
+            console.warn('Fallo en la API en producción, intentando con el servidor local:', error.message);
+ 
+            // Intentar con el servidor local
+            try {
+                const response = await fetch(`${localApiBaseUrl}/usuarios/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+ 
+                if (response.ok) {
+                    successMessage.classList.remove('d-none');
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 5000);
+                } else {
+                    const data = await response.json();
+                    errorMessage.textContent = data.message || 'Error desconocido.';
+                    errorMessage.classList.remove('d-none');
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 5000);
+                }
+            } catch (localError) {
+                errorMessage.textContent = 'Error al conectar con el servidor.';
+                errorMessage.classList.remove('d-none');
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 5000);
+            }
         }
     });
 </script>
+
+
 </body>
 </html>

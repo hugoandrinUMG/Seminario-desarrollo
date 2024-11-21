@@ -17,44 +17,100 @@
 </form>
 <h2>Get All Users</h2>
 <button id="getAllUsers">Get Users</button>
+
+
 <script>
-        const apiBaseUrl = 'http://localhost:3000/api';
-        // Handle Create User form submission
-        document.getElementById('createUserForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const nombre = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const contrasena = document.getElementById('contrasena').value;
-            const rol = document.getElementById('rol').value;
-            const response = await fetch(`${apiBaseUrl}/usuarios`, {
+    // URLs del backend
+    const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api';
+    const localApiBaseUrl = 'http://localhost:3000/api';
+ 
+    // Función que agrega un timeout a fetch
+    async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+ 
+        try {
+            const response = await fetch(resource, { ...options, signal: controller.signal });
+            clearTimeout(timeoutId); // Limpiar el temporizador si la respuesta llega antes
+            return response;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Tiempo de espera agotado para la solicitud.');
+            }
+            throw error;
+        }
+    }
+ 
+    // Función para realizar una solicitud a ambos entornos
+    async function makeRequest(path, options) {
+        try {
+            // Intentar con la API en producción
+            const response = await fetchWithTimeout(`${productionApiBaseUrl}${path}`, options);
+            return response;
+        } catch (error) {
+            console.warn('Fallo en la API en producción, intentando con el servidor local:', error.message);
+            // Intentar con la API local
+            const response = await fetch(`${localApiBaseUrl}${path}`, options);
+            return response;
+        }
+    }
+ 
+    // Handle Create User form submission
+    document.getElementById('createUserForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const nombre = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const contrasena = document.getElementById('contrasena').value;
+        const rol = document.getElementById('rol').value;
+ 
+        try {
+            const response = await makeRequest('/usuarios', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, email, contrasena, rol })
+                body: JSON.stringify({ nombre, email, contrasena, rol }),
             });
-            const data = await response.json();
-            console.log(data);
-        });
-        // Handle Get All Users button click
-document.getElementById('getAllUsers').addEventListener('click', async () => {
-    const response = await fetch(`${apiBaseUrl}/usuarios`);
-    // Verificar si la respuesta fue exitosa (status 200)
-    if (response.ok) {
-        const data = await response.json();
-        // Mostrar los usuarios en consola (opcional)
-        console.log(data);
  
-        // Mostrar los usuarios en el HTML
-        const usersList = document.createElement('ul');
-        data.forEach(usuario => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `Nombre: ${usuario.nombre}, Email: ${usuario.email}, Rol: ${usuario.rol}`;
-            usersList.appendChild(listItem);
-        });
-        document.body.appendChild(usersList); // Agregar la lista al body del documento
-    } else {
-        console.error('Error al obtener usuarios:', response.statusText);
-    }
-});
+            const data = await response.json();
+            if (response.ok) {
+                console.log('Usuario creado:', data);
+                alert('Usuario creado exitosamente');
+            } else {
+                console.error('Error al crear usuario:', data.message || response.statusText);
+                alert(`Error al crear usuario: ${data.message || 'Error desconocido'}`);
+            }
+        } catch (error) {
+            console.error('Error en la conexión:', error.message);
+            alert('No se pudo conectar al servidor.');
+        }
+    });
+ 
+    // Handle Get All Users button click
+    document.getElementById('getAllUsers').addEventListener('click', async () => {
+        try {
+            const response = await makeRequest('/usuarios');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Usuarios obtenidos:', data);
+ 
+                // Mostrar los usuarios en el HTML
+                const usersList = document.createElement('ul');
+                data.forEach(usuario => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Nombre: ${usuario.nombre}, Email: ${usuario.email}, Rol: ${usuario.rol}`;
+                    usersList.appendChild(listItem);
+                });
+                document.body.appendChild(usersList);
+            } else {
+                console.error('Error al obtener usuarios:', response.statusText);
+                alert('Error al obtener usuarios.');
+            }
+        } catch (error) {
+            console.error('Error en la conexión:', error.message);
+            alert('No se pudo conectar al servidor.');
+        }
+    });
 </script>
+
+
 </body>
 </html>

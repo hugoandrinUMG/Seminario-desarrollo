@@ -88,28 +88,67 @@
 </section>
  
 <!-- Bootstrap JS -->
-<script src="js/bootstrap.bundle.min.js"></script>
 <script>
-    const apiBaseUrl = 'http://localhost:3000/api';
+    // Define las URLs del backend
+    const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api';
+    const localApiBaseUrl = 'http://localhost:3000/api';
  
+    // Función que agrega un timeout a fetch
+    async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+ 
+        try {
+            const response = await fetch(resource, { ...options, signal: controller.signal });
+            clearTimeout(timeoutId); // Limpia el temporizador si la respuesta llega antes
+            return response;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Tiempo de espera agotado para la solicitud.');
+            }
+            throw error;
+        }
+    }
+ 
+    async function fetchWithFallback(endpoint, options) {
+        try {
+            // Intentar con el servidor en producción con un timeout de 3 segundos
+            const productionResponse = await fetchWithTimeout(`${productionApiBaseUrl}${endpoint}`, options, 3000);
+            if (productionResponse.ok) {
+                return await productionResponse.json();
+            }
+            throw new Error('API en producción no disponible');
+        } catch (error) {
+            console.warn('Fallo en la API en producción, intentando con el servidor local:', error.message);
+            // Intentar con el servidor local
+            const localResponse = await fetch(`${localApiBaseUrl}${endpoint}`, options);
+            if (localResponse.ok) {
+                return await localResponse.json();
+            }
+            throw new Error('API local también falló');
+        }
+    }
+ 
+    // Manejo del formulario de login
     document.getElementById('loginForm').addEventListener('submit', async (event) => {
         event.preventDefault();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
  
-        const response = await fetch(`${apiBaseUrl}/usuarios/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, contrasena: password }),
-        });
+        try {
+            const data = await fetchWithFallback('/usuarios/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, contrasena: password }),
+            });
  
-        const data = await response.json();
-        if (response.ok) {
+            // Si el login es exitoso
             alert('Login exitoso');
             localStorage.setItem('token', data.token); // Guarda el token en localStorage
             window.location.href = 'dashboard.html';  // Redirige al dashboard
-        } else {
-            alert(data.message);
+        } catch (error) {
+            // Manejo de errores
+            alert(`Error: ${error.message}`);
         }
     });
 </script>

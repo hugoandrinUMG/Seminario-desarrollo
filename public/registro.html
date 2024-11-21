@@ -68,8 +68,31 @@
 </form>
 </div>
  
+
+
 <script>
     let intentosFallidos = 0; // Contador de intentos fallidos
+ 
+    // URLs del backend
+    const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api/usuarios';
+    const localApiBaseUrl = 'http://localhost:3000/api/usuarios';
+ 
+    // Función que agrega un timeout a fetch
+    async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+ 
+        try {
+            const response = await fetch(resource, { ...options, signal: controller.signal });
+            clearTimeout(timeoutId); // Limpiar el temporizador si la respuesta llega antes
+            return response;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Tiempo de espera agotado para la solicitud.');
+            }
+            throw error;
+        }
+    }
  
     document.getElementById('registerForm').addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -86,7 +109,8 @@
         document.getElementById('errorGeneral').textContent = '';
  
         try {
-            const response = await fetch('http://localhost:3000/api/usuarios', {
+            // Intentar con la API en producción con un timeout de 3 segundos
+            const response = await fetchWithTimeout(productionApiBaseUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombre, email, contrasena, rol }),
@@ -117,9 +141,48 @@
                 }
             }
         } catch (error) {
-            document.getElementById('errorGeneral').textContent = 'Error al conectar con el servidor.';
+            console.warn('Fallo en la API en producción, intentando con el servidor local:', error.message);
+ 
+            // Intentar con el servidor local
+            try {
+                const response = await fetch(localApiBaseUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email, contrasena, rol }),
+                });
+ 
+                const data = await response.json();
+ 
+                if (response.ok) {
+                    alert('Usuario registrado exitosamente');
+                    window.location.href = 'home.html';
+                } else {
+                    // Mostrar errores específicos
+                    if (data.message.includes('nombre')) {
+                        document.getElementById('errorNombre').textContent = data.message;
+                    } else if (data.message.includes('email')) {
+                        document.getElementById('errorEmail').textContent = data.message;
+                    } else if (data.message.includes('contraseña')) {
+                        document.getElementById('errorContrasena').textContent = data.message;
+                    } else {
+                        document.getElementById('errorGeneral').textContent = data.message;
+                    }
+ 
+                    intentosFallidos++; // Incrementar intentos fallidos
+ 
+                    if (intentosFallidos >= 5) {
+                        alert('Demasiados intentos fallidos. Redirigiendo...');
+                        window.location.href = 'home.html';
+                    }
+                }
+            } catch (localError) {
+                document.getElementById('errorGeneral').textContent = 'Error al conectar con el servidor.';
+            }
         }
     });
 </script>
+
+
+
 </body>
 </html>
