@@ -62,6 +62,5 @@ app.listen(port, () => {
 
 // Ruta para servir reset_clave.html al acceder a /reset-password
 app.get('/reset-password', (req, res) => {
-  res.sendFile(__dirname + '/public/reset_clave.html');
+  res.sendFile(__dirname + '/public/actualizar_clave.html');
 });
-
