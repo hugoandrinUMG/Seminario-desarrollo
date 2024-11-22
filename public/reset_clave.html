@@ -48,12 +48,12 @@
 <h3 class="text-center mb-4">Restablecer Contraseña</h3>
 <form id="resetPasswordForm">
 <div class="mb-3">
-<label for="email" class="form-label">Correo Electrónico</label>
-<input type="email" id="email" name="email" class="form-control" required>
+<label for="nuevaContrasena" class="form-label">Nueva Contraseña</label>
+<input type="password" id="nuevaContrasena" name="nuevaContrasena" class="form-control" required>
 </div>
-<button type="submit" class="btn btn-info w-100">Enviar Enlace de Restablecimiento</button>
-<p id="success-message" class="success-message d-none">Correo enviado correctamente. Revisa tu bandeja de entrada.</p>
-<p id="error-message" class="error-message d-none">Correo no registrado. Redirigiendo al inicio...</p>
+<button type="submit" class="btn btn-info w-100">Restablecer Contraseña</button>
+<p id="success-message" class="success-message d-none">Contraseña restablecida correctamente. Redirigiendo...</p>
+<p id="error-message" class="error-message d-none">Error al restablecer la contraseña.</p>
 </form>
 </div>
 </div>
@@ -61,6 +61,15 @@
 <script>
     const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api';
     const localApiBaseUrl = 'http://localhost:3000/api';
+ 
+    // Capturar el token de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+ 
+    if (!token) {
+        alert('Token no encontrado. Por favor, verifica el enlace.');
+        window.location.href = 'home.html';
+    }
  
     async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
         const controller = new AbortController();
@@ -80,7 +89,7 @@
  
     document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
         event.preventDefault();
-        const email = document.getElementById('email').value;
+        const nuevaContrasena = document.getElementById('nuevaContrasena').value;
  
         const successMessage = document.getElementById('success-message');
         const errorMessage = document.getElementById('error-message');
@@ -88,10 +97,11 @@
         errorMessage.classList.add('d-none');
  
         try {
+            // Intentar con la API en producción
             const response = await fetchWithTimeout(`${productionApiBaseUrl}/usuarios/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ token, nuevaContrasena }),
             });
  
             if (response.ok) {
@@ -111,7 +121,7 @@
                 const response = await fetch(`${localApiBaseUrl}/usuarios/reset-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email }),
+                    body: JSON.stringify({ token, nuevaContrasena }),
                 });
  
                 if (response.ok) {

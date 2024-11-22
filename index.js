@@ -60,7 +60,8 @@ app.listen(port, () => {
   //console.log(process.env.JWT_SECRET); // solo para test eliminar luego
 });
 
+// Ruta para servir reset_clave.html al acceder a /reset-password
 app.get('/reset-password', (req, res) => {
-  res.sendFile(__dirname + '/public/reset_password_form.html');
+  res.sendFile(__dirname + '/public/reset_clave.html');
 });
 
