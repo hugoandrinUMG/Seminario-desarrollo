@@ -5,10 +5,18 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 const pool = require('./config/db');
-
-// Importar las rutas de usuarios
+const casoPruebaRoutes = require('./routes/casoPrueba');
+const defectoRoutes = require('./routes/defectos');
+const documentoRoutes = require('./routes/documentos');
+const ejecucionesPruebaRoutes = require('./routes/ejecucionesPrueba');
+const historialDefectosRoutes = require('./routes/historialDefectos');
+const planPruebasRoutes = require('./routes/planPruebas');
+const reportesRoutes = require('./routes/reportes');
+const scriptsRoutes = require('./routes/scripts');
+const proyectosRoutes = require('./routes/proyectos');
 const usuariosRoutes = require('./routes/usuarios');
- 
+
+
 // Middleware
 app.use(express.json());
 app.use(cors());
@@ -64,3 +72,71 @@ app.listen(port, () => {
 app.get('/reset-password', (req, res) => {
   res.sendFile(__dirname + '/public/actualizar_clave.html');
 });
+
+
+
+
+
+// Usar las rutas de casos de prueba
+app.use('/api/casos-prueba', casoPruebaRoutes);
+
+
+
+
+
+
+// Usar las rutas para defectos
+app.use('/api/defectos', defectoRoutes);
+
+
+
+
+
+// Usar las rutas para documentos
+app.use('/api/documentos', documentoRoutes);
+
+
+
+
+
+// Usar las rutas para ejecuciones de prueba
+app.use('/api/ejecuciones-prueba', ejecucionesPruebaRoutes);
+
+
+
+
+// Usar las rutas para el historial de defectos
+app.use('/api/historial-defectos', historialDefectosRoutes);
+
+
+
+
+
+// Usar las rutas para los planes de prueba
+app.use('/api/planes-prueba', planPruebasRoutes);
+
+
+
+
+
+
+// Usar las rutas para los reportes
+app.use('/api/reportes', reportesRoutes);
+
+
+
+
+
+
+
+// Usar las rutas para los scripts
+app.use('/api/scripts', scriptsRoutes);
+
+
+
+
+
+
+
+// Usar las rutas para los proyectos
+app.use('/api/proyectos', proyectosRoutes);

@@ -61,6 +61,74 @@
 <input type="number" id="deleteId" placeholder="User ID" required />
 <button type="submit">Delete User</button>
 </form>
+
+
+<!-- Casos de Prueba -->
+<section>
+    <h2>Casos de Prueba</h2>
+    <button id="getCasosPrueba">Get All Casos de Prueba</button>
+    <ul id="casosPruebaList"></ul>
+</section>
+
+<!-- Defectos -->
+<section>
+    <h2>Defectos</h2>
+    <button id="getDefectos">Get All Defectos</button>
+    <ul id="defectosList"></ul>
+</section>
+
+<!-- Documentos -->
+<section>
+    <h2>Documentos</h2>
+    <button id="getDocumentos">Get All Documentos</button>
+    <ul id="documentosList"></ul>
+</section>
+
+<!-- Ejecuciones de Prueba -->
+<section>
+    <h2>Ejecuciones de Prueba</h2>
+    <button id="getEjecuciones">Get All Ejecuciones</button>
+    <ul id="ejecucionesList"></ul>
+</section>
+
+<!-- Historial de Defectos -->
+<section>
+    <h2>Historial de Defectos</h2>
+    <button id="getHistorialDefectos">Get All Historial de Defectos</button>
+    <ul id="historialDefectosList"></ul>
+</section>
+
+<!-- Planes de Prueba -->
+<section>
+    <h2>Planes de Prueba</h2>
+    <button id="getPlanesPrueba">Get All Planes de Prueba</button>
+    <ul id="planesPruebaList"></ul>
+</section>
+
+<!-- Proyectos -->
+<section>
+    <h2>Proyectos</h2>
+    <button id="getProyectos">Get All Proyectos</button>
+    <ul id="proyectosList"></ul>
+</section>
+
+<!-- Reportes -->
+<section>
+    <h2>Reportes</h2>
+    <button id="getReportes">Get All Reportes</button>
+    <ul id="reportesList"></ul>
+</section>
+
+<!-- Scripts -->
+<section>
+    <h2>Scripts</h2>
+    <button id="getScripts">Get All Scripts</button>
+    <ul id="scriptsList"></ul>
+</section>
+
+
+
+
 </div>
  
     <script>
@@ -223,6 +291,35 @@
                 alert('No se pudo conectar al servidor.');
             }
         });
+
+
+        const endpoints = [
+        { buttonId: 'getAllUsers', listId: 'usersList', path: '/usuarios' },
+        { buttonId: 'getCasosPrueba', listId: 'casosPruebaList', path: '/casos-prueba' },
+        { buttonId: 'getDefectos', listId: 'defectosList', path: '/defectos' },
+        { buttonId: 'getDocumentos', listId: 'documentosList', path: '/documentos' },
+        { buttonId: 'getEjecuciones', listId: 'ejecucionesList', path: '/ejecuciones-prueba' },
+        { buttonId: 'getHistorialDefectos', listId: 'historialDefectosList', path: '/historial-defectos' },
+        { buttonId: 'getPlanesPrueba', listId: 'planesPruebaList', path: '/planes-prueba' },
+        { buttonId: 'getProyectos', listId: 'proyectosList', path: '/proyectos' },
+        { buttonId: 'getReportes', listId: 'reportesList', path: '/reportes' },
+        { buttonId: 'getScripts', listId: 'scriptsList', path: '/scripts' },
+    ];
+
+    endpoints.forEach(({ buttonId, listId, path }) => {
+        document.getElementById(buttonId).addEventListener('click', async () => {
+            const data = await makeRequest(path);
+            const list = document.getElementById(listId);
+            list.innerHTML = '';
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = JSON.stringify(item, null, 2);
+                list.appendChild(li);
+            });
+        });
+    });
+
+
 </script>
 </body>
 </html>
