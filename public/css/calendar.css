@@ -1,0 +1,110 @@
+#calendar {
+  min-height: 500px; /* Asegura altura mínima */
+  border-radius: 8px;
+  padding: 10px;
+  background-color: var(--bg-color); /* Fondo dinámico según el tema */
+  color: var(--text-color); /* Texto dinámico */
+  border: 1px solid var(--text-color); /* Borde visible */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  margin-top: 20px;
+}
+
+.fc-header-toolbar {
+  margin-bottom: 10px;
+  background-color: var(--sidebar-bg); /* Fondo dinámico del encabezado */
+  color: var(--text-color);
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.fc-event {
+  font-size: 14px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--bg-color); /* Texto dinámico del evento */
+  background-color: var(--text-color); /* Fondo dinámico del evento */
+  border: 1px solid var(--hover-bg); /* Borde dinámico */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+[data-theme="dark"] .fc-event {
+  color: #000; /* Texto negro en modo oscuro */
+  background-color: var(--hover-bg); /* Fondo claro para contraste */
+}
+
+.fc-event:hover {
+  background-color: var(--active-bg); /* Fondo al pasar el cursor */
+  color: var(--text-color); /* Texto contrastado al pasar el cursor */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra al pasar el cursor */
+}
+
+.fc {
+  background-color: var(--bg-color); /* Fondo general del calendario */
+  color: var(--text-color); /* Texto del calendario */
+  border-color: var(--text-color); /* Bordes del calendario */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.fc-toolbar-title {
+  color: var(--text-color); /* Título del calendario */
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.fc-button {
+  background-color: var(--hover-bg); /* Fondo de botones */
+  color: var(--text-color); /* Texto de botones */
+  border: 1px solid var(--text-color); /* Bordes de botones */
+  border-radius: 5px;
+  padding: 5px 10px;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+
+.fc-button:hover {
+  background-color: var(--active-bg); /* Fondo al pasar el cursor */
+  color: var(--text-color); /* Texto dinámico */
+  transform: scale(1.05); /* Efecto de agrandamiento al pasar el cursor */
+}
+
+.fc-button:active {
+  background-color: var(--text-color); /* Fondo al hacer clic */
+  color: var(--bg-color); /* Texto inverso al hacer clic */
+}
+
+.fc-daygrid-day {
+  background-color: var(--bg-color); /* Fondo de los días */
+  color: var(--text-color); /* Texto de los días */
+  border: 1px solid var(--hover-bg); /* Borde sutil entre días */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.fc-daygrid-day:hover {
+  background-color: var(--hover-bg); /* Fondo al pasar el cursor sobre un día */
+  color: var(--text-color); /* Asegura que el texto sea visible */
+}
+
+.fc-day-today {
+  background-color: var(--active-bg); /* Fondo dinámico para el día actual */
+  border: 1px solid var(--text-color); /* Borde destacado para el día actual */
+}
+
+.fc-day-today:hover {
+  background-color: var(--hover-bg); /* Fondo al pasar el cursor sobre el día actual */
+  color: var(--text-color);
+}
+
+.fc-daygrid-event {
+  font-size: 13px;
+  padding: 3px 6px;
+  background-color: var(--text-color); /* Fondo dinámico para eventos */
+  color: var(--bg-color); /* Texto dinámico para eventos */
+  border: 1px solid var(--hover-bg); /* Bordes dinámicos */
+  border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] .fc-daygrid-event {
+  color: #000; /* Texto negro en modo oscuro */
+  background-color: var(--hover-bg); /* Fondo claro en modo oscuro */
+}

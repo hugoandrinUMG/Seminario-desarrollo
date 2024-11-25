@@ -1,0 +1,52 @@
+#kanban {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; /* Espaciado uniforme entre columnas */
+  padding: 20px;
+}
+
+#kanban .card {
+  flex: 1; /* Cada columna ocupa el mismo ancho */
+  min-height: 300px;
+  background-color: var(--sidebar-bg); /* Fondo dinámico según el tema */
+  color: var(--text-color); /* Texto dinámico según el tema */
+  border: 1px solid var(--text-color); /* Bordes dinámicos */
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+#kanban .card-header {
+  background-color: var(--hover-bg); /* Fondo dinámico de la cabecera */
+  color: var(--text-color); /* Texto dinámico de la cabecera */
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid var(--text-color); /* Separación visual */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.card-body {
+  min-height: 250px;
+  overflow-y: auto; /* Permite desplazamiento si el contenido es grande */
+  padding: 10px;
+  background-color: var(--bg-color); /* Fondo dinámico */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card-body > .task {
+  background-color: var(--sidebar-bg); /* Fondo dinámico de las tareas */
+  color: var(--text-color); /* Texto dinámico */
+  padding: 10px;
+  border: 1px solid var(--text-color); /* Bordes dinámicos */
+  border-radius: 5px;
+  margin-bottom: 10px;
+  cursor: grab;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-body > .task:hover {
+  background-color: var(--hover-bg); /* Fondo dinámico al pasar el cursor */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Mayor sombra al pasar el cursor */
+}

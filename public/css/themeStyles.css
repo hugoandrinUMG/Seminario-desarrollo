@@ -1,0 +1,77 @@
+:root {
+  --bg-color: #fbfbfb;
+  --text-color: #212529;
+  --sidebar-bg: #ffffff;
+  --navbar-bg: #ffffff;
+  --link-color: #000;
+  --active-bg: #e9ecef;
+  --hover-bg: #f8f9fa;
+}
+
+[data-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #f4f4f4;
+  --sidebar-bg: #1e1e1e;
+  --navbar-bg: #1e1e1e;
+  --link-color: #f4f4f4;
+  --active-bg: #333333;
+  --hover-bg: #2a2a2a;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar {
+  position: fixed;
+  top: 58px;
+  bottom: 0;
+  left: 0;
+  padding-top: 1rem;
+  box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);
+  width: 240px;
+  background-color: var(--sidebar-bg);
+  z-index: 600;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar .list-group-item {
+  color: var(--link-color);
+  background-color: var(--sidebar-bg);
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.sidebar .list-group-item.active {
+  background-color: var(--active-bg);
+}
+
+.sidebar .list-group-item:hover {
+  background-color: var(--hover-bg);
+}
+
+.navbar {
+  background-color: var(--navbar-bg);
+  transition: background-color 0.3s ease;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+main {
+  margin-top: 58px;
+  padding-left: 240px;
+}
+
+#content {
+  margin-top: 100px;
+  text-align: center;
+}
+
+#content h1 {
+  margin-bottom: 20px;
+}

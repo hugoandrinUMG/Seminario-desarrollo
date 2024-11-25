@@ -6,85 +6,13 @@
   <title>AndriQA - Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --bg-color: #fbfbfb;
-      --text-color: #212529;
-      --sidebar-bg: #ffffff;
-      --navbar-bg: #ffffff;
-      --link-color: #000;
-      --active-bg: #e9ecef;
-      --hover-bg: #f8f9fa;
-    }
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/themeStyles.css">
+  <link rel="stylesheet" href="css/kanban.css">
+  <link rel="stylesheet" href="css/calendar.css">
 
-    [data-theme="dark"] {
-      --bg-color: #121212;
-      --text-color: #f4f4f4;
-      --sidebar-bg: #1e1e1e;
-      --navbar-bg: #1e1e1e;
-      --link-color: #f4f4f4;
-      --active-bg: #333333;
-      --hover-bg: #2a2a2a;
-    }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .sidebar {
-      position: fixed;
-      top: 58px;
-      bottom: 0;
-      left: 0;
-      padding-top: 1rem;
-      box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);
-      width: 240px;
-      background-color: var(--sidebar-bg);
-      z-index: 600;
-      transition: background-color 0.3s ease;
-    }
-
-    .sidebar .list-group-item {
-      color: var(--link-color);
-      background-color: var(--sidebar-bg);
-      transition: color 0.3s ease, background-color 0.3s ease;
-    }
-
-    .sidebar .list-group-item.active {
-      background-color: var(--active-bg);
-    }
-
-    .sidebar .list-group-item:hover {
-      background-color: var(--hover-bg);
-    }
-
-    .navbar {
-      background-color: var(--navbar-bg);
-      transition: background-color 0.3s ease;
-    }
-
-    .navbar-brand {
-      font-weight: bold;
-      color: var(--text-color);
-      transition: color 0.3s ease;
-    }
-
-    main {
-      margin-top: 58px;
-      padding-left: 240px;
-    }
-
-    #content {
-      margin-top: 100px;
-      text-align: center;
-    }
-
-    #content h1 {
-      margin-bottom: 20px;
-    }
-  </style>
 </head>
 <body>
   <!-- Sidebar -->
@@ -118,75 +46,116 @@
   </nav>
   <!-- Sidebar -->
 
-  <!-- Navbar -->
-  <nav id="main-navbar" class="navbar navbar-expand-lg fixed-top">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">AndriQA</a>
-      <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
-        <!-- Dark Mode Toggle -->
-        <li class="nav-item me-3">
-          <span class="theme-toggler" id="themeToggler">
-            <i class="fas fa-adjust"></i>
-          </span>
-        </li>
-        <!-- Dropdown Menu -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle hidden-arrow d-flex align-items-center" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user-circle"></i>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
-            <li><a class="dropdown-item" href="#">Configuracion</a></li>
-            <li><a class="dropdown-item" href="#" id="logoutDropdown">Cerrar Sesion</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-  </nav>
-  <!-- Navbar -->
+<!-- Navbar -->
+<nav id="main-navbar" class="navbar navbar-expand-lg fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">AndriQA</a>
+    <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
+      <!-- Dark Mode Toggle -->
+      <li class="nav-item me-3">
+        <span class="theme-toggler" id="themeToggler">
+          <i class="fas fa-adjust"></i>
+        </span>
+      </li>
+      <!-- Dropdown Menu -->
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle hidden-arrow d-flex align-items-center" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-user-circle"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+          <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+          <li><a class="dropdown-item" href="#">Configuracion</a></li>
+          <li><a class="dropdown-item" href="#" id="logoutDropdown">Cerrar Sesion</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</nav>
+<!-- Navbar -->
+
 
   <!-- Main Layout -->
   <main>
     <div class="container">
       <div id="content">
+      
         <h1>Bienvenido al Dashboard de AndriQA</h1>
         <p>Selecciona una opción en el menú lateral para comenzar.</p>
+
+        <div id="kanban" class="row">
+          <!-- Columna: Pendientes -->
+          <div class="col-lg-2 col-md-6 mb-4">
+            <div class="card shadow-sm">
+              <div class="card-header bg-secondary text-white text-center">
+                <strong>Pendientes</strong>
+              </div>
+              <div class="card-body" id="pendientes">
+                <!-- Aquí se agregarán los proyectos automáticamente -->
+              </div>
+            </div>
+          </div>
+        
+          <!-- Columna: Por Hacer -->
+          <div class="col-lg-2 col-md-6 mb-4">
+            <div class="card shadow-sm">
+              <div class="card-header bg-primary text-white text-center">
+                <strong>Por Hacer</strong>
+              </div>
+              <div class="card-body" id="porHacer">
+                <!-- Aquí se agregarán los proyectos automáticamente -->
+              </div>
+            </div>
+          </div>
+        
+          <!-- Columna: En Progreso -->
+          <div class="col-lg-2 col-md-6 mb-4">
+            <div class="card shadow-sm">
+              <div class="card-header bg-warning text-white text-center">
+                <strong>En Progreso</strong>
+              </div>
+              <div class="card-body" id="enProgreso">
+                <!-- Aquí se agregarán los proyectos automáticamente -->
+              </div>
+            </div>
+          </div>
+        
+          <!-- Columna: Hecho -->
+          <div class="col-lg-2 col-md-6 mb-4">
+            <div class="card shadow-sm">
+              <div class="card-header bg-success text-white text-center">
+                <strong>Hecho</strong>
+              </div>
+              <div class="card-body" id="hecho">
+                <!-- Aquí se agregarán los proyectos automáticamente -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div id="calendar" style="margin-top: 50px;"></div>
+        </div>
+
+        
+
+
       </div>
     </div>
   </main>
 
-  <script>
-    // Alternar entre modo claro y oscuro
-    document.getElementById('themeToggler').addEventListener('click', () => {
-      const currentTheme = document.body.dataset.theme || 'light';
-      document.body.dataset.theme = currentTheme === 'dark' ? 'light' : 'dark';
-    });
   
-    // Funcionalidad de cerrar sesión
-    const logoutLink = document.getElementById('logoutLink');
-    const logoutDropdown = document.getElementById('logoutDropdown');
-  
-    // Verificar si los elementos existen antes de agregar los eventos
-    if (logoutLink) {
-      logoutLink.addEventListener('click', () => {
-        handleLogout();
-      });
-    }
-  
-    if (logoutDropdown) {
-      logoutDropdown.addEventListener('click', () => {
-        handleLogout();
-      });
-    }
-  
-    // Función común para manejar el cierre de sesión
-    function handleLogout() {
-      localStorage.removeItem('token');
-      window.location.href = 'home.html';
-    }
-  </script>
-  
+  <!--   <script src="js/kanbanCalendar.js"></script>  -->
+  <script src="js/themeToggler.js"></script>
+  <script src="js/logoutHandler.js"></script>
+  <script src="js/kanban.js" defer></script>
+  <script src="js/calendar.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+  
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+
 </body>
 </html>
