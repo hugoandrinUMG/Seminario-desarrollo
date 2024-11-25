@@ -3,24 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/home.css">
-<title>Empresa - Página Principal</title>
+<title>AndriQA - Gestión de Calidad</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+  #intro {
+    background-image: url("/img/Home-image.jpg");
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+  }
+  .navbar .nav-link {
+    color: #fff !important;
+  }
+  .footer-links .btn i {
+    margin-right: 8px;
+  }
+</style>
 </head>
 <body>
-<header class="bg-dark text-white p-3 text-center">
-<h1>Bienvenido a [Nombre de la Empresa]</h1>
-</header>
-<main class="container my-5">
-<div class="text-center">
-<h2>Gestión de Calidad de Software</h2>
-<p>Tu solución para pruebas y control de calidad eficientes.</p>
-<a href="login.html" class="btn btn-primary btn-lg">Iniciar Sesión</a>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">AndriQA - Sistema de Gestion de Calidad</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link btn btn-primary text-white" href="login.html">Iniciar Sesión</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- Background Section -->
+<div id="intro" class="d-flex justify-content-center align-items-center text-center">
+  <div class="text-white">
+    <h1 class="mb-3">Bienvenido a AndriQA</h1>
+    <p>AndriQA es una plataforma para la gestión de pruebas y control de calidad en el desarrollo de software. 
+    Nuestro objetivo es optimizar procesos de validación y asegurar la calidad de los productos.</p>
+    <p>Con AndriQA podrás gestionar casos de prueba, reportar defectos, controlar planes de prueba y más. 
+    Es la herramienta ideal para equipos que buscan mejorar la eficiencia y profesionalismo en sus proyectos.</p>
+  </div>
 </div>
-</main>
+
+<!-- Footer -->
 <footer class="bg-light text-center py-3">
-<p>© 2024 [Nombre de la Empresa]. Todos los derechos reservados.</p>
+  <p class="mb-0">
+    © 2024 AndriQA | Desarrollado por Hugo Andrino | Universidad Mariano Gálvez de Guatemala
+  </p>
+  <div class="footer-links mt-2">
+    <a href="https://www.facebook.com/hugo.andrino" class="btn btn-primary btn-sm" target="_blank">
+      <i class="fab fa-facebook-f"></i> Facebook(Personal)
+    </a>
+    <a href="https://www.facebook.com/u.marianogalvez" class="btn btn-primary btn-sm" target="_blank">
+        <i class="fab fa-facebook-f"></i> Facebook(Universidad)
+      </a>
+    <a href="https://github.com/hugoandrinUMG" class="btn btn-dark btn-sm" target="_blank">
+      <i class="fab fa-github"></i> GitHub
+    </a>
+  </div>
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

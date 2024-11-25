@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Test</title>
+<style>
+        #authForm, #mainContent {
+            display: none;
+        }
+        #authForm.active, #mainContent.active {
+            display: block;
+        }
+</style>
+</head>
+<body>
+<!-- Formulario de autenticación -->
+<div id="authForm" class="active">
+<h1>Autenticación Requerida</h1>
+<form id="loginForm">
+<input type="text" id="username" placeholder="Usuario" required />
+<input type="password" id="password" placeholder="Contraseña" required />
+<button type="submit">Iniciar Sesión</button>
+</form>
+<p id="loginError" style="color: red; display: none;">Usuario o contraseña incorrectos.</p>
+</div>
+ 
+    <!-- Contenido principal (API Test) -->
+<div id="mainContent">
+<h1>Test API Endpoints</h1>
+ 
+        <!-- Crear Usuario -->
+<h2>Create User</h2>
+<form id="createUserForm">
+<input type="text" id="name" placeholder="Name" required />
+<input type="email" id="email" placeholder="Email" required />
+<input type="password" id="contrasena" placeholder="Password" required />
+<input type="text" id="rol" placeholder="Role" required />
+<button type="submit">Create User</button>
+</form>
+ 
+        <!-- Obtener Usuarios -->
+<h2>Get All Users</h2>
+<button id="getAllUsers">Get Users</button>
+<ul id="usersList"></ul>
+ 
+        <!-- Actualizar Usuario -->
+<h2>Update User</h2>
+<form id="updateUserForm">
+<input type="number" id="updateId" placeholder="User ID" required />
+<input type="text" id="updateName" placeholder="Name" />
+<input type="email" id="updateEmail" placeholder="Email" />
+<input type="password" id="updateContrasena" placeholder="Password" />
+<input type="text" id="updateRol" placeholder="Role" />
+<button type="submit">Update User</button>
+</form>
+ 
+        <!-- Eliminar Usuario -->
+<h2>Delete User</h2>
+<form id="deleteUserForm">
+<input type="number" id="deleteId" placeholder="User ID" required />
+<button type="submit">Delete User</button>
+</form>
+
+
+<!-- Casos de Prueba -->
+<section>
+    <h2>Casos de Prueba</h2>
+    <button id="getCasosPrueba">Get All Casos de Prueba</button>
+    <ul id="casosPruebaList"></ul>
+</section>
+
+<!-- Defectos -->
+<section>
+    <h2>Defectos</h2>
+    <button id="getDefectos">Get All Defectos</button>
+    <ul id="defectosList"></ul>
+</section>
+
+<!-- Documentos -->
+<section>
+    <h2>Documentos</h2>
+    <button id="getDocumentos">Get All Documentos</button>
+    <ul id="documentosList"></ul>
+</section>
+
+<!-- Ejecuciones de Prueba -->
+<section>
+    <h2>Ejecuciones de Prueba</h2>
+    <button id="getEjecuciones">Get All Ejecuciones</button>
+    <ul id="ejecucionesList"></ul>
+</section>
+
+<!-- Historial de Defectos -->
+<section>
+    <h2>Historial de Defectos</h2>
+    <button id="getHistorialDefectos">Get All Historial de Defectos</button>
+    <ul id="historialDefectosList"></ul>
+</section>
+
+<!-- Planes de Prueba -->
+<section>
+    <h2>Planes de Prueba</h2>
+    <button id="getPlanesPrueba">Get All Planes de Prueba</button>
+    <ul id="planesPruebaList"></ul>
+</section>
+
+<!-- Proyectos -->
+<section>
+    <h2>Proyectos</h2>
+    <button id="getProyectos">Get All Proyectos</button>
+    <ul id="proyectosList"></ul>
+</section>
+
+<!-- Reportes -->
+<section>
+    <h2>Reportes</h2>
+    <button id="getReportes">Get All Reportes</button>
+    <ul id="reportesList"></ul>
+</section>
+
+<!-- Scripts -->
+<section>
+    <h2>Scripts</h2>
+    <button id="getScripts">Get All Scripts</button>
+    <ul id="scriptsList"></ul>
+</section>
+
+
+
+
+</div>
+ 
+    <script>
+        // Credenciales de autenticación
+        const validUsername = 'hugoandrin';
+        const validPassword = 'Half-life21995';
+ 
+        // Elementos del DOM
+        const authForm = document.getElementById('authForm');
+        const mainContent = document.getElementById('mainContent');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+ 
+        // Manejar inicio de sesión
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+ 
+            if (username === validUsername && password === validPassword) {
+                authForm.classList.remove('active');
+                mainContent.classList.add('active');
+            } else {
+                loginError.style.display = 'block';
+            }
+        });
+ 
+        // URLs del backend
+        const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api';
+        const localApiBaseUrl = 'http://localhost:3000/api';
+ 
+        // Función que agrega un timeout a fetch
+        async function fetchWithTimeout(resource, options = {}, timeout = 3000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(resource, { ...options, signal: controller.signal });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Tiempo de espera agotado para la solicitud.');
+                }
+                throw error;
+            }
+        }
+ 
+        // Función para realizar una solicitud a ambos entornos
+        async function makeRequest(path, options) {
+            try {
+                const response = await fetchWithTimeout(`${productionApiBaseUrl}${path}`, options);
+                return response;
+            } catch (error) {
+                console.warn('Fallo en la API en producción, intentando con el servidor local:', error.message);
+                const response = await fetch(`${localApiBaseUrl}${path}`, options);
+                return response;
+            }
+        }
+ 
+        // Crear usuario
+        document.getElementById('createUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const nombre = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const contrasena = document.getElementById('contrasena').value;
+            const rol = document.getElementById('rol').value;
+ 
+            try {
+                const response = await makeRequest('/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email, contrasena, rol }),
+                });
+ 
+                const data = await response.json();
+                if (response.ok) {
+                    console.log('Usuario creado:', data);
+                    alert('Usuario creado exitosamente');
+                } else {
+                    alert(`Error al crear usuario: ${data.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                alert('No se pudo conectar al servidor.');
+            }
+        });
+ 
+        // Obtener usuarios
+        document.getElementById('getAllUsers').addEventListener('click', async () => {
+            try {
+                const response = await makeRequest('/usuarios');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Usuarios obtenidos:', data);
+ 
+                    const usersList = document.getElementById('usersList');
+                    usersList.innerHTML = ''; // Limpiar lista existente
+                    data.forEach(usuario => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `
+                            ID: ${usuario.id}, 
+                            Nombre: ${usuario.nombre}, 
+                            Email: ${usuario.email}, 
+                            Rol: ${usuario.rol}, 
+                            Token: ${usuario.token_restablecimiento || 'N/A'}, 
+                            Expiración: ${usuario.expiracion_token || 'N/A'}
+                        `;
+                        usersList.appendChild(listItem);
+                    });
+                } else {
+                    alert('Error al obtener usuarios.');
+                }
+            } catch (error) {
+                alert('No se pudo conectar al servidor.');
+            }
+        });
+ 
+        // Actualizar usuario
+        document.getElementById('updateUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('updateId').value;
+            const nombre = document.getElementById('updateName').value;
+            const email = document.getElementById('updateEmail').value;
+            const contrasena = document.getElementById('updateContrasena').value;
+            const rol = document.getElementById('updateRol').value;
+ 
+            try {
+                const response = await makeRequest(`/usuarios/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email, contrasena, rol }),
+                });
+ 
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Usuario actualizado exitosamente');
+                } else {
+                    alert(`Error al actualizar usuario: ${data.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                alert('No se pudo conectar al servidor.');
+            }
+        });
+ 
+        // Eliminar usuario
+        document.getElementById('deleteUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('deleteId').value;
+ 
+            try {
+                const response = await makeRequest(`/usuarios/${id}`, {
+                    method: 'DELETE',
+                });
+ 
+                if (response.ok) {
+                    alert('Usuario eliminado exitosamente');
+                } else {
+                    alert('Error al eliminar usuario.');
+                }
+            } catch (error) {
+                alert('No se pudo conectar al servidor.');
+            }
+        });
+
+
+        const endpoints = [
+        { buttonId: 'getAllUsers', listId: 'usersList', path: '/usuarios' },
+        { buttonId: 'getCasosPrueba', listId: 'casosPruebaList', path: '/casos-prueba' },
+        { buttonId: 'getDefectos', listId: 'defectosList', path: '/defectos' },
+        { buttonId: 'getDocumentos', listId: 'documentosList', path: '/documentos' },
+        { buttonId: 'getEjecuciones', listId: 'ejecucionesList', path: '/ejecuciones-prueba' },
+        { buttonId: 'getHistorialDefectos', listId: 'historialDefectosList', path: '/historial-defectos' },
+        { buttonId: 'getPlanesPrueba', listId: 'planesPruebaList', path: '/planes-prueba' },
+        { buttonId: 'getProyectos', listId: 'proyectosList', path: '/proyectos' },
+        { buttonId: 'getReportes', listId: 'reportesList', path: '/reportes' },
+        { buttonId: 'getScripts', listId: 'scriptsList', path: '/scripts' },
+    ];
+
+    endpoints.forEach(({ buttonId, listId, path }) => {
+        document.getElementById(buttonId).addEventListener('click', async () => {
+            const data = await makeRequest(path);
+            const list = document.getElementById(listId);
+            list.innerHTML = '';
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = JSON.stringify(item, null, 2);
+                list.appendChild(li);
+            });
+        });
+    });
+
+
+</script>
+</body>
+</html>
