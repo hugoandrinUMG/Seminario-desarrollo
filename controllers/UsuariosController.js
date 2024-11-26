@@ -126,7 +126,21 @@ exports.actualizarUsuario = async (req, res) => {
     try {
         const { nombre, email, rol, contrasena } = req.body;
  
-        // Hashear la nueva contraseña si es proporcionada
+        // Validar nueva contraseña si se proporciona
+        if (contrasena) {
+            if (contrasena.length < 15) {
+                return res.status(400).json({ message: 'La contraseña debe tener al menos 15 caracteres.' });
+            }
+ 
+            const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{15,}$/;
+            if (!regex.test(contrasena)) {
+                return res.status(400).json({
+                    message: 'La contraseña debe contener al menos una mayúscula, un número y un símbolo.',
+                });
+            }
+        }
+ 
+        // Hashear la nueva contraseña si es válida
         const hashedPassword = contrasena ? await bcrypt.hash(contrasena, 10) : undefined;
  
         const usuarioActualizado = await Usuario.actualizarUsuario(req.params.id, {
@@ -136,7 +150,11 @@ exports.actualizarUsuario = async (req, res) => {
             contrasena: hashedPassword || undefined,
         });
  
-        res.status(200).json(usuarioActualizado);
+        if (!usuarioActualizado) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+ 
+        res.status(200).json({ message: 'Usuario actualizado con éxito.', usuario: usuarioActualizado });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -171,7 +189,7 @@ exports.autenticarUsuario = async (req, res) => {
  
         // Generar token JWT
         const token = jwt.sign(
-            { id: usuario.id, email: usuario.email },
+            { id: usuario.id, email: usuario.email, rol: usuario.rol},
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );

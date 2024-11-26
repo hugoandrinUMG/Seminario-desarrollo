@@ -16,14 +16,44 @@ const UsuarioModel = {
     const result = await pool.query('SELECT * FROM usuarios WHERE id = $1', [id]);
     return result.rows[0];
   },
+
+
   actualizarUsuario: async (id, datos) => {
     const { nombre, email, rol, contrasena } = datos;
-    const result = await pool.query(
-      'UPDATE usuarios SET nombre = $1, email = $2, rol = $3, contrasena = $4 WHERE id = $5 RETURNING *',
-      [nombre, email, rol, contrasena, id]
-    );
+ 
+    // Construir consulta dinámica para excluir la contraseña si no se proporciona
+    const queryParts = [];
+    const queryValues = [id];
+ 
+    if (nombre) {
+        queryParts.push(`nombre = $${queryValues.length + 1}`);
+        queryValues.push(nombre);
+    }
+    if (email) {
+        queryParts.push(`email = $${queryValues.length + 1}`);
+        queryValues.push(email);
+    }
+    if (rol) {
+        queryParts.push(`rol = $${queryValues.length + 1}`);
+        queryValues.push(rol);
+    }
+    if (contrasena) {
+        queryParts.push(`contrasena = $${queryValues.length + 1}`);
+        queryValues.push(contrasena);
+    }
+ 
+    const query = `
+        UPDATE usuarios
+        SET ${queryParts.join(', ')}
+        WHERE id = $1
+        RETURNING *;
+    `;
+ 
+    const result = await pool.query(query, queryValues);
     return result.rows[0];
-  },
+},
+
+
   eliminarUsuario: async (id) => {
     await pool.query('DELETE FROM usuarios WHERE id = $1', [id]);
   },
