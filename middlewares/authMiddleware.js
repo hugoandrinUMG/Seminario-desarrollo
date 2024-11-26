@@ -21,24 +21,26 @@ const authMiddleware = {
  
   verifyRole: (rolesPermitidos) => {
     return async (req, res, next) => {
-      try {
-        const { id } = req.user;
- 
-        // Consulta al usuario por su ID para obtener el rol
-        const result = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [id]);
-        const usuario = result.rows[0];
- 
-        if (!usuario || !rolesPermitidos.includes(usuario.rol)) {
-          return res.status(403).json({ message: 'Acceso denegado: Rol no autorizado' });
+        try {
+            const { id } = req.user; // Obtener el ID del usuario del token
+            // Consulta al usuario por su ID para obtener el rol
+            const result = await pool.query('SELECT rol FROM usuarios WHERE id = $1', [id]);
+            const usuario = result.rows[0];
+            if (!usuario) {
+                return res.status(403).json({ message: 'Acceso denegado: Usuario no encontrado.' });
+            }
+            if (!rolesPermitidos.includes(usuario.rol)) {
+                return res.status(403).json({ message: 'Acceso denegado: Rol no autorizado.' });
+            }
+            next(); // Si el rol está permitido, continuar con la petición
+        } catch (error) {
+            console.error('Error al verificar el rol:', error);
+            res.status(500).json({ message: 'Error interno al verificar el rol.' });
         }
- 
-        next(); // Si el rol está permitido, continuar con la petición
-      } catch (error) {
-        console.error('Error al verificar el rol:', error);
-        res.status(500).json({ message: 'Error interno al verificar el rol' });
-      }
     };
-  },
+},
+
+
 };
  
 module.exports = authMiddleware;

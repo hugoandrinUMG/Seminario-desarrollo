@@ -125,7 +125,7 @@
             if (localResponse.ok) {
                 return await localResponse.json();
             }
-            throw new Error('API local también falló');
+            throw new Error('Usuario no encontrado - Verifica si los datos ingresados son correctos...');
         }
     }
  

@@ -74,8 +74,11 @@
     let intentosFallidos = 0; // Contador de intentos fallidos
  
     // URLs del backend
-    const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api/usuarios';
-    const localApiBaseUrl = 'http://localhost:3000/api/usuarios';
+    //const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api/usuarios';
+    //const localApiBaseUrl = 'http://localhost:3000/api/usuarios';
+    
+    const productionApiBaseUrl = 'https://seminario-desarrollo-backend.onrender.com/api/usuarios/public';
+    const localApiBaseUrl = 'http://localhost:3000/api/usuarios/public';
  
     // Función que agrega un timeout a fetch
     async function fetchWithTimeout(resource, options = {}, timeout = 3000) {

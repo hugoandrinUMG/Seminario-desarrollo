@@ -20,29 +20,38 @@ document.addEventListener('DOMContentLoaded', () => {
         mostrarDashboard();
     });
  
-    // Mostrar el módulo de usuarios al hacer clic
-    usuariosLink.addEventListener('click', async () => {
-        content.innerHTML = '<p>Cargando...</p>'; // Indicador de carga
+  
+// Mostrar el módulo de usuarios al hacer clic
+usuariosLink.addEventListener('click', async () => {
+    content.innerHTML = '<p>Cargando...</p>'; // Indicador de carga
  
-        const token = localStorage.getItem('token');
-        if (!token) {
-            content.innerHTML = '<p>Acceso denegado. Debe iniciar sesión.</p>';
-            return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+        content.innerHTML = '<p>Acceso denegado. Debe iniciar sesión.</p>';
+        return;
+    }
+ 
+    try {
+        // Solicitar usuarios al backend
+        const response = await fetch('/api/usuarios', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+ 
+        if (!response.ok) {
+            throw new Error('No tiene permisos para acceder a esta sección.');
         }
  
-        try {
-            const response = await fetch('/api/usuarios', {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+        const usuarios = await response.json();
  
-            if (!response.ok) throw new Error('Acceso denegado o error al cargar datos.');
- 
-            const usuarios = await response.json();
- 
-            content.innerHTML = `
+        // Generar contenido dinámico para los usuarios
+        content.innerHTML = `
 <div id="usuariosCrud" class="container mt-5">
 <h2>Gestión de Usuarios</h2>
 <button id="crearUsuarioBtn" class="btn btn-primary mb-3">Crear Usuario</button>
+<input type="text" id="buscarUsuario" class="form-control mb-3" placeholder="Buscar usuario por correo">
 <table class="table table-striped table-dark-mode">
 <thead>
 <tr>
@@ -54,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </tr>
 </thead>
 <tbody id="usuariosTable">
-                            ${usuarios.map(user => `
+                        ${usuarios.map(user => `
 <tr data-id="${user.id}">
 <td>${user.id}</td>
 <td>${user.nombre}</td>
@@ -65,86 +74,220 @@ document.addEventListener('DOMContentLoaded', () => {
 <button class="btn btn-danger btn-sm deleteUsuarioBtn">Eliminar</button>
 </td>
 </tr>
-                            `).join('')}
+                        `).join('')}
 </tbody>
 </table>
+<nav id="paginacion" class="mt-3">
+<!-- La paginación se generará dinámicamente -->
+</nav>
 </div>
-            `;
+        `;
  
-            // Agregar funcionalidad a los botones
-            document.getElementById('crearUsuarioBtn').addEventListener('click', mostrarFormularioCrear);
-            document.querySelectorAll('.editUsuarioBtn').forEach(button => {
-                button.addEventListener('click', mostrarFormularioEditar);
-            });
-            document.querySelectorAll('.deleteUsuarioBtn').forEach(button => {
-                button.addEventListener('click', eliminarUsuario);
-            });
-        } catch (error) {
-            content.innerHTML = '<p>No tiene permisos para acceder a esta sección.</p>';
-        }
+        // Agregar funcionalidad a los botones y la búsqueda
+        document.getElementById('crearUsuarioBtn').addEventListener('click', mostrarFormularioCrear);
+        document.querySelectorAll('.editUsuarioBtn').forEach(button => {
+            button.addEventListener('click', mostrarFormularioEditar);
+        });
+        document.querySelectorAll('.deleteUsuarioBtn').forEach(button => {
+            button.addEventListener('click', eliminarUsuario);
+        });
+        document.getElementById('buscarUsuario').addEventListener('input', buscarUsuario);
+ 
+        // Generar paginación
+        generarPaginacion(usuarios);
+    } catch (error) {
+        content.innerHTML = `<p>${error.message}</p>`;
+    }
+});
+ 
+// Función para la búsqueda de usuarios por correo
+function buscarUsuario() {
+    const query = document.getElementById('buscarUsuario').value.toLowerCase();
+    const filas = document.querySelectorAll('#usuariosTable tr');
+    filas.forEach(fila => {
+        const email = fila.children[2].textContent.toLowerCase();
+        fila.style.display = email.includes(query) ? '' : 'none';
     });
+}
  
-    // Función para mostrar el formulario de creación
-    function mostrarFormularioCrear() {
-        content.innerHTML = `
+// Función para generar la paginación
+function generarPaginacion(usuarios, elementosPorPagina = 10) {
+    const totalPaginas = Math.ceil(usuarios.length / elementosPorPagina);
+    const paginacion = document.getElementById('paginacion');
+    paginacion.innerHTML = '';
+ 
+    for (let i = 1; i <= totalPaginas; i++) {
+        const boton = document.createElement('button');
+        boton.textContent = i;
+        boton.className = 'btn btn-secondary mx-1';
+        boton.addEventListener('click', () => cargarPagina(usuarios, i, elementosPorPagina));
+        paginacion.appendChild(boton);
+    }
+ 
+    // Cargar la primera página al iniciar
+    cargarPagina(usuarios, 1, elementosPorPagina);
+}
+ 
+// Función para cargar una página de usuarios
+function cargarPagina(usuarios, pagina, elementosPorPagina) {
+    const inicio = (pagina - 1) * elementosPorPagina;
+    const fin = inicio + elementosPorPagina;
+    const usuariosPagina = usuarios.slice(inicio, fin);
+ 
+    const tabla = document.getElementById('usuariosTable');
+    tabla.innerHTML = usuariosPagina.map(user => `
+<tr data-id="${user.id}">
+<td>${user.id}</td>
+<td>${user.nombre}</td>
+<td>${user.email}</td>
+<td>${user.rol}</td>
+<td>
+<button class="btn btn-warning btn-sm editUsuarioBtn">Editar</button>
+<button class="btn btn-danger btn-sm deleteUsuarioBtn">Eliminar</button>
+</td>
+</tr>
+    `).join('');
+ 
+    // Reactivar botones en la tabla
+    document.querySelectorAll('.editUsuarioBtn').forEach(button => {
+        button.addEventListener('click', mostrarFormularioEditar);
+    });
+    document.querySelectorAll('.deleteUsuarioBtn').forEach(button => {
+        button.addEventListener('click', eliminarUsuario);
+    });
+}
+
+
+
+ 
+// Función para mostrar el formulario de creación
+function mostrarFormularioCrear() {
+    content.innerHTML = `
 <div class="container mt-5">
 <h2>Crear Usuario</h2>
 <form id="crearUsuarioForm">
 <div class="mb-3">
 <label for="nombre" class="form-label">Nombre</label>
 <input type="text" class="form-control" id="nombre" required>
+<div id="errorNombre" class="text-danger mt-2" style="display: none;"></div>
 </div>
 <div class="mb-3">
 <label for="email" class="form-label">Email</label>
 <input type="email" class="form-control" id="email" required>
+<div id="errorEmail" class="text-danger mt-2" style="display: none;"></div>
 </div>
 <div class="mb-3">
 <label for="contrasena" class="form-label">Contraseña</label>
 <input type="password" class="form-control" id="contrasena" required>
+<div id="errorContrasena" class="text-danger mt-2" style="display: none;"></div>
 </div>
 <div class="mb-3">
 <label for="rol" class="form-label">Rol</label>
-<input type="text" class="form-control" id="rol" required>
+<select id="rol" class="form-select">
+<option value="Administrador">Administrador</option>
+<option value="Desarrollador">Desarrollador</option>
+<option value="Diseñador">Diseñador</option>
+<option value="Tester">Tester</option>
+<option value="Analista">Analista</option>
+<option value="Soporte Técnico">Soporte Técnico</option>
+<option value="Líder de Proyecto">Líder de Proyecto</option>
+<option value="Scrum Master">Scrum Master</option>
+<option value="Arquitecto de Software">Arquitecto de Software</option>
+</select>
 </div>
 <button type="submit" class="btn btn-success">Crear</button>
 <button type="button" class="btn btn-secondary" id="cancelarCrear">Cancelar</button>
 </form>
 </div>
-        `;
+    `;
  
-        document.getElementById('crearUsuarioForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+    document.getElementById('crearUsuarioForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
  
-            const usuario = {
-                nombre: document.getElementById('nombre').value,
-                email: document.getElementById('email').value,
-                contrasena: document.getElementById('contrasena').value,
-                rol: document.getElementById('rol').value,
-            };
+        const nombre = document.getElementById('nombre').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const contrasena = document.getElementById('contrasena').value.trim();
+        const rol = document.getElementById('rol').value;
+        const errorNombre = document.getElementById('errorNombre');
+        const errorEmail = document.getElementById('errorEmail');
+        const errorContrasena = document.getElementById('errorContrasena');
  
-            try {
-                const response = await fetch('/api/usuarios', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    },
-                    body: JSON.stringify(usuario),
-                });
+        // Validar nombre y correo existentes
+        try {
+            const usuarios = await fetch('/api/usuarios', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            }).then((res) => res.json());
  
-                if (!response.ok) throw new Error('Error al crear usuario.');
- 
-                alert('Usuario creado exitosamente.');
-                usuariosLink.click(); // Volver a cargar el módulo de usuarios
-            } catch (error) {
-                alert('Error: ' + error.message);
+            // Validar nombre existente
+            const nombreExistente = usuarios.find((u) => u.nombre === nombre);
+            if (nombreExistente) {
+                errorNombre.textContent = 'El nombre ya está registrado.';
+                errorNombre.style.display = 'block';
+                return;
+            } else {
+                errorNombre.style.display = 'none';
             }
-        });
  
-        document.getElementById('cancelarCrear').addEventListener('click', () => {
-            usuariosLink.click(); // Volver al listado
-        });
-    }
+            // Validar correo existente
+            const emailExistente = usuarios.find((u) => u.email === email);
+            if (emailExistente) {
+                errorEmail.textContent = 'El email ya está registrado.';
+                errorEmail.style.display = 'block';
+                return;
+            } else {
+                errorEmail.style.display = 'none';
+            }
+        } catch (error) {
+            alert('Error al validar nombre o correo.');
+            return;
+        }
+ 
+        // Validar contraseña
+        if (contrasena.length < 15) {
+            errorContrasena.textContent = 'La contraseña debe tener al menos 15 caracteres.';
+            errorContrasena.style.display = 'block';
+            return;
+        }
+ 
+        const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{15,}$/;
+        if (!regex.test(contrasena)) {
+            errorContrasena.textContent = 'La contraseña debe contener al menos una mayúscula, un número y un símbolo.';
+            errorContrasena.style.display = 'block';
+            return;
+        }
+ 
+        errorContrasena.style.display = 'none';
+ 
+        const usuario = { nombre, email, contrasena, rol };
+ 
+        // Crear usuario
+        try {
+            const response = await fetch('/api/usuarios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify(usuario),
+            });
+ 
+            if (!response.ok) throw new Error('Error al crear usuario.');
+ 
+            alert('Usuario creado exitosamente.');
+            usuariosLink.click(); // Volver a la lista
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+ 
+    document.getElementById('cancelarCrear').addEventListener('click', () => {
+        usuariosLink.click(); // Volver al listado
+    });
+}
  
 
 // Mostrar formulario de edición con datos precargados
@@ -162,10 +305,12 @@ function mostrarFormularioEditar(e) {
 <div class="mb-3">
 <label for="nombre" class="form-label">Nombre</label>
 <input type="text" class="form-control" id="nombre" value="${nombre}" required>
+<div id="errorNombre" class="text-danger mt-2" style="display: none;"></div>
 </div>
 <div class="mb-3">
 <label for="email" class="form-label">Email</label>
 <input type="email" class="form-control" id="email" value="${email}" required>
+<div id="errorEmail" class="text-danger mt-2" style="display: none;"></div>
 </div>
 <div class="mb-3">
 <label for="rol" class="form-label">Rol</label>
@@ -188,6 +333,7 @@ function mostrarFormularioEditar(e) {
 <button type="button" class="btn btn-outline-secondary" id="mostrarContrasena">👁️</button>
 </div>
 <small class="form-text text-muted">Dejar vacío si no deseas cambiar la contraseña.</small>
+<div id="errorContrasena" class="text-danger mt-2" style="display: none;"></div>
 </div>
 <button type="submit" class="btn btn-primary">Actualizar</button>
 <button type="button" class="btn btn-secondary" id="cancelarEditar">Cancelar</button>
@@ -205,12 +351,66 @@ function mostrarFormularioEditar(e) {
     document.getElementById('editarUsuarioForm').addEventListener('submit', async (event) => {
         event.preventDefault();
  
-        const usuario = {
-            nombre: document.getElementById('nombre').value,
-            email: document.getElementById('email').value,
-            rol: document.getElementById('rol').value,
-            contrasena: document.getElementById('contrasena').value || undefined,
-        };
+        const nombre = document.getElementById('nombre').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const rol = document.getElementById('rol').value;
+        const contrasena = document.getElementById('contrasena').value.trim();
+        const errorNombre = document.getElementById('errorNombre');
+        const errorEmail = document.getElementById('errorEmail');
+        const errorContrasena = document.getElementById('errorContrasena');
+ 
+        // Validar nombre y correo directamente
+        try {
+            const usuarios = await fetch('/api/usuarios', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            }).then((res) => res.json());
+ 
+            // Validar nombre existente
+            const nombreExistente = usuarios.find((u) => u.nombre === nombre && u.id !== parseInt(userId));
+            if (nombreExistente) {
+                errorNombre.textContent = 'El nombre ya está registrado.';
+                errorNombre.style.display = 'block';
+                return;
+            } else {
+                errorNombre.style.display = 'none';
+            }
+ 
+            // Validar correo existente
+            const emailExistente = usuarios.find((u) => u.email === email && u.id !== parseInt(userId));
+            if (emailExistente) {
+                errorEmail.textContent = 'El email ya está registrado.';
+                errorEmail.style.display = 'block';
+                return;
+            } else {
+                errorEmail.style.display = 'none';
+            }
+        } catch (error) {
+            alert('Error al validar nombre o correo.');
+            return;
+        }
+ 
+        // Validaciones de contraseña
+        if (contrasena && contrasena.length < 15) {
+            errorContrasena.textContent = 'La contraseña debe tener al menos 15 caracteres.';
+            errorContrasena.style.display = 'block';
+            return;
+        }
+ 
+        const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{15,}$/;
+        if (contrasena && !regex.test(contrasena)) {
+            errorContrasena.textContent = 'La contraseña debe contener al menos una mayúscula, un número y un símbolo.';
+            errorContrasena.style.display = 'block';
+            return;
+        }
+ 
+        errorContrasena.style.display = 'none';
+ 
+        // Actualizar usuario
+        const usuario = { nombre, email, rol, contrasena: contrasena || undefined };
  
         try {
             const response = await fetch(`/api/usuarios/${userId}`, {
