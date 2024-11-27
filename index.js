@@ -15,7 +15,13 @@ const reportesRoutes = require('./routes/reportes');
 const scriptsRoutes = require('./routes/scripts');
 const proyectosRoutes = require('./routes/proyectos');
 const usuariosRoutes = require('./routes/usuarios');
+const inicializarBaseDeDatos = require('./middlewares/dbInit'); // Se usa para agregar campos nuevos a la BD
 
+
+// Middleware para inicializar la base de datos (Agregar campos extra)
+(async () => {
+  await inicializarBaseDeDatos();
+})();
 
 // Middleware
 app.use(express.json());
