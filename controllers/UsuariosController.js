@@ -1,4 +1,5 @@
 const Usuario = require('../models/UsuarioModel');
+const pool = require('../config/db'); // Asegúrate de importar pool correctamente
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const transporter = require('../middlewares/emailService');
@@ -100,10 +101,22 @@ exports.crearUsuarios = async (req, res) => {
 // Obtener todos los usuarios
 exports.obtenerUsuarios = async (req, res) => {
     try {
-        const usuarios = await Usuario.obtenerTodos();
-        res.status(200).json(usuarios);
+        const { rol } = req.user;
+ 
+        let query;
+        if (rol === 'Administrador') {
+            query = 'SELECT * FROM usuarios';
+        } else if (['Scrum Master', 'Líder de Proyecto'].includes(rol)) {
+            query = 'SELECT id, nombre, rol FROM usuarios';
+        } else {
+            return res.status(403).json({ message: 'Acceso denegado: Rol no autorizado.' });
+        }
+ 
+        const result = await pool.query(query);
+        res.status(200).json(result.rows);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error al obtener usuarios:', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
     }
 };
  

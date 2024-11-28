@@ -43,7 +43,6 @@ proyectosLink.addEventListener('click', async () => {
 <div id="proyectosCrud" class="container mt-5">
 <h2>Gestión de Proyectos</h2>
 <button id="crearProyectoBtn" class="btn btn-primary mb-3">Crear Proyecto</button>
-<input type="text" id="buscarProyecto" class="form-control mb-3" placeholder="Buscar proyecto por nombre">
 <table class="table table-striped table-dark-mode">
 <thead>
 <tr>
@@ -52,18 +51,18 @@ proyectosLink.addEventListener('click', async () => {
 <th>Descripción</th>
 <th>Fecha Inicio</th>
 <th>Fecha Fin</th>
+<th>Estado</th>
 <th>Acciones</th>
 </tr>
 </thead>
-
 <tbody id="proyectosTable">
     ${proyectos.map(proyecto => `
 <tr data-id="${proyecto.id}">
 <td>${proyecto.id}</td>
 <td>${proyecto.nombre}</td>
 <td>${proyecto.descripcion}</td>
-<td>${formatFecha(proyecto.fecha_inicio)}</td>
-<td>${formatFecha(proyecto.fecha_fin)}</td>
+<td>${proyecto.fecha_inicio}</td>
+<td>${proyecto.fecha_fin}</td>
 <td>${proyecto.estado || 'Sin Estado'}</td>
 <td>
 <button class="btn btn-warning btn-sm editProyectoBtn">Editar</button>
@@ -72,12 +71,33 @@ proyectosLink.addEventListener('click', async () => {
 </tr>
     `).join('')}
 </tbody>
-
 </table>
-<nav id="paginacionProyectos" class="mt-3"></nav>
 </div>
         `;
  
+        // **Aquí se agrega el Punto 3**
+        let userRole = null;
+        if (token) {
+            const roleResponse = await fetch('/api/usuarios/me', {
+                method: 'GET',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const userData = await roleResponse.json();
+            userRole = userData.rol.trim(); // Elimina espacios en blanco
+ 
+            // Mostrar/ocultar botones según el rol
+            if (['Administrador', 'Líder de Proyecto', 'Scrum Master'].includes(userRole)) {
+                document.getElementById('crearProyectoBtn').style.display = 'block';
+                document.querySelectorAll('.editProyectoBtn').forEach(btn => btn.style.display = 'block');
+                document.querySelectorAll('.deleteProyectoBtn').forEach(btn => btn.style.display = 'block');
+            } else {
+                document.getElementById('crearProyectoBtn').style.display = 'none';
+                document.querySelectorAll('.editProyectoBtn').forEach(btn => btn.style.display = 'none');
+                document.querySelectorAll('.deleteProyectoBtn').forEach(btn => btn.style.display = 'none');
+            }
+        }
+ 
+        // Agregar eventos a botones después de mostrar/ocultar según rol
         document.getElementById('crearProyectoBtn').addEventListener('click', mostrarFormularioCrearProyecto);
         document.querySelectorAll('.editProyectoBtn').forEach(button => {
             button.addEventListener('click', mostrarFormularioEditarProyecto);
@@ -85,28 +105,38 @@ proyectosLink.addEventListener('click', async () => {
         document.querySelectorAll('.deleteProyectoBtn').forEach(button => {
             button.addEventListener('click', eliminarProyecto);
         });
-        document.getElementById('buscarProyecto').addEventListener('input', buscarProyecto);
  
-    // Generar paginación
-    generarPaginacionProyectos(proyectos);
-} catch (error) {
-    content.innerHTML = `<p>${error.message}</p>`;
-}
+    } catch (error) {
+        content.innerHTML = `<p>${error.message}</p>`;
+    }
 });
 
 async function mostrarFormularioCrearProyecto() {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('/api/usuarios', {
+ 
+        // Obtener el rol del usuario actual
+        const userResponse = await fetch('/api/usuarios/me', {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
+        if (!userResponse.ok) throw new Error('No tienes permisos para crear proyectos.');
+        const userData = await userResponse.json();
+        const userRole = userData.rol.trim();
  
-        if (!response.ok) throw new Error('Error al cargar la lista de usuarios.');
+        // Verificar si el usuario tiene permisos para crear proyectos
+        if (!['Administrador', 'Scrum Master', 'Líder de Proyecto'].includes(userRole)) {
+            throw new Error('No tienes permisos para crear proyectos.');
+        }
  
-        const usuarios = await response.json();
+        // Obtener la lista de usuarios (esto sigue siendo necesario para asignar un usuario al proyecto)
+        const usuariosResponse = await fetch('/api/usuarios', {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!usuariosResponse.ok) throw new Error('Error al cargar la lista de usuarios.');
+        const usuarios = await usuariosResponse.json();
  
-
         content.innerHTML = `
 <div class="container mt-5">
 <h2>Crear Proyecto</h2>
@@ -151,9 +181,6 @@ async function mostrarFormularioCrearProyecto() {
 </form>
 </div>
 `;
-
-
-
  
         document.getElementById('crearProyectoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -162,19 +189,19 @@ async function mostrarFormularioCrearProyecto() {
             const fecha_inicio = document.getElementById('fecha_inicio').value;
             const fecha_fin = document.getElementById('fecha_fin').value;
             const id_usuario = document.getElementById('id_usuario').value;
+            const estado = document.getElementById('estado').value;
  
             try {
                 const response = await fetch('/api/proyectos', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado }),
                 });
  
                 if (!response.ok) throw new Error('Error al crear el proyecto.');
- 
                 alert('Proyecto creado exitosamente.');
                 proyectosLink.click();
             } catch (error) {
@@ -195,21 +222,34 @@ async function mostrarFormularioEditarProyecto(event) {
  
     try {
         const token = localStorage.getItem('token');
+ 
+        // Verificar si el usuario tiene permisos para editar proyectos
+        const userResponse = await fetch('/api/usuarios/me', {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!userResponse.ok) throw new Error('No tienes permisos para editar proyectos.');
+        const userData = await userResponse.json();
+        const userRole = userData.rol.trim();
+ 
+        if (!['Administrador', 'Scrum Master', 'Líder de Proyecto'].includes(userRole)) {
+            throw new Error('No tienes permisos para editar proyectos.');
+        }
+ 
+        // Obtener datos del proyecto
         const proyectoResponse = await fetch(`/api/proyectos/${id}`, {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
- 
         if (!proyectoResponse.ok) throw new Error('Error al cargar el proyecto.');
+        const proyecto = await proyectoResponse.json();
  
+        // Obtener lista de usuarios
         const usuariosResponse = await fetch('/api/usuarios', {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
- 
         if (!usuariosResponse.ok) throw new Error('Error al cargar la lista de usuarios.');
- 
-        const proyecto = await proyectoResponse.json();
         const usuarios = await usuariosResponse.json();
  
         content.innerHTML = `
@@ -232,7 +272,6 @@ async function mostrarFormularioEditarProyecto(event) {
 <label for="fecha_fin" class="form-label">Fecha de Fin</label>
 <input type="date" class="form-control" id="fecha_fin" value="${proyecto.fecha_fin.split('T')[0]}" required>
 </div>
-
 <div class="mb-3">
 <label for="id_usuario" class="form-label">Asignar a Usuario</label>
 <select class="form-select" id="id_usuario" required>
@@ -252,7 +291,7 @@ async function mostrarFormularioEditarProyecto(event) {
 <option value="Hecho" ${proyecto.estado === 'Hecho' ? 'selected' : ''}>Hecho</option>
 </select>
 </div>
-
+ 
 <button type="submit" class="btn btn-success">Actualizar</button>
 <button type="button" class="btn btn-secondary" id="cancelarEditarProyecto">Cancelar</button>
 </form>
@@ -266,19 +305,19 @@ async function mostrarFormularioEditarProyecto(event) {
             const fecha_inicio = document.getElementById('fecha_inicio').value;
             const fecha_fin = document.getElementById('fecha_fin').value;
             const id_usuario = document.getElementById('id_usuario').value;
+            const estado = document.getElementById('estado').value;
  
             try {
                 const response = await fetch(`/api/proyectos/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado }),
                 });
  
                 if (!response.ok) throw new Error('Error al actualizar el proyecto.');
- 
                 alert('Proyecto actualizado exitosamente.');
                 proyectosLink.click();
             } catch (error) {
@@ -356,9 +395,10 @@ function cargarPaginaProyectos(proyectos, pagina, elementosPorPagina) {
 <td>${proyecto.id}</td>
 <td>${proyecto.nombre}</td>
 <td>${proyecto.descripcion}</td>
-<td>${proyecto.fecha_inicio}</td>
-<td>${proyecto.fecha_fin}</td>
-<td>
+<td>${formatFecha(proyecto.fecha_inicio)}</td>
+<td>${formatFecha(proyecto.fecha_fin)}</td>
+<td>${proyecto.estado || 'Sin Estado'}</td> <!-- Columna de Estado -->
+<td> <!-- Columna de Acciones -->
 <button class="btn btn-warning btn-sm editProyectoBtn">Editar</button>
 <button class="btn btn-danger btn-sm deleteProyectoBtn">Eliminar</button>
 </td>
@@ -385,7 +425,6 @@ function buscarProyecto() {
     });
 }
 
-
 // Función para actualizar el tablero Kanban
 async function actualizarKanban() {
     const token = localStorage.getItem('token');
@@ -410,12 +449,13 @@ async function actualizarKanban() {
         document.getElementById('hecho').innerHTML = '';
  
         // Distribuir proyectos en columnas
-        
         proyectos.forEach(proyecto => {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'task';
             tarjeta.textContent = proyecto.nombre;
-         
+            tarjeta.setAttribute('draggable', true); // Habilitar drag-and-drop
+            tarjeta.dataset.id = proyecto.id; // ID del proyecto para actualizar estado
+ 
             if (proyecto.estado === 'Pendiente') {
                 document.getElementById('pendientes').appendChild(tarjeta);
             } else if (proyecto.estado === 'Por Hacer') {
@@ -426,7 +466,7 @@ async function actualizarKanban() {
                 document.getElementById('hecho').appendChild(tarjeta);
             }
         });
-
+ 
     } catch (error) {
         console.error('Error al actualizar el tablero Kanban:', error);
     }

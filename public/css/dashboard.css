@@ -48,3 +48,6 @@
     color: #999;
   }
   
+  .dragging {
+    opacity: 0.5;
+}

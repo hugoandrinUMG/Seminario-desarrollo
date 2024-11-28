@@ -50,3 +50,7 @@
   background-color: var(--hover-bg); /* Fondo dinámico al pasar el cursor */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Mayor sombra al pasar el cursor */
 }
+
+.dragging {
+  opacity: 0.5;
+}

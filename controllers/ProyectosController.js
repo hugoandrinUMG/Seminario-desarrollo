@@ -1,15 +1,17 @@
 const Proyecto = require('../models/ProyectoModel');
 
-// Crear proyecto
 exports.crearProyecto = async (req, res) => {
     try {
         const { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado } = req.body;
-
-        // Validar campos requeridos
-        if (!nombre || !descripcion || !fecha_inicio || !fecha_fin || !id_usuario || !estado ) {
+ 
+        if (typeof estado !== 'string') {
+            return res.status(400).json({ message: 'El campo "estado" debe ser una cadena válida.' });
+        }
+ 
+        if (!nombre || !descripcion || !fecha_inicio || !fecha_fin || !id_usuario || !estado) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
         }
-
+ 
         const proyecto = await Proyecto.crearProyecto({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado });
         res.status(201).json(proyecto);
     } catch (error) {
@@ -48,12 +50,17 @@ exports.obtenerProyectoPorId = async (req, res) => {
 exports.actualizarProyecto = async (req, res) => {
     try {
         const { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado } = req.body;
-
-        // Validar campos requeridos
+ 
+        if (typeof estado !== 'string') {
+            return res.status(400).json({ message: 'El campo "estado" debe ser una cadena válida.' });
+        }
+ 
         if (!nombre || !descripcion || !fecha_inicio || !fecha_fin || !id_usuario || !estado) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
         }
-
+ 
+        console.log('Datos que llegan al controlador para actualizar:', { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado }); // Log para depuración
+ 
         const proyectoActualizado = await Proyecto.actualizarProyecto(req.params.id, {
             nombre,
             descripcion,
@@ -62,7 +69,7 @@ exports.actualizarProyecto = async (req, res) => {
             id_usuario,
             estado,
         });
-
+ 
         if (proyectoActualizado) {
             res.status(200).json(proyectoActualizado);
         } else {

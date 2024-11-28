@@ -13,12 +13,17 @@ async function inicializarBaseDeDatos() {
         if (result.rows.length === 0) {
             // La columna no existe, agregarla
             const alterQuery = `
-                ALTER TABLE proyectos ADD COLUMN estado VARCHAR(20) DEFAULT 'Pendiente';
+                ALTER TABLE proyectos ADD COLUMN estado VARCHAR(50) DEFAULT 'Pendiente';
             `;
             await pool.query(alterQuery);
             console.log('Columna "estado" añadida exitosamente.');
         } else {
-            console.log('La columna "estado" ya existe.');
+            // La columna existe, verificar y cambiar el tamaño a 50
+            const alterSizeQuery = `
+                ALTER TABLE proyectos ALTER COLUMN estado TYPE VARCHAR(50);
+            `;
+            await pool.query(alterSizeQuery);
+            console.log('Columna "estado" actualizada a VARCHAR(50).');
         }
     } catch (error) {
         console.error('Error al inicializar la base de datos:', error.message);

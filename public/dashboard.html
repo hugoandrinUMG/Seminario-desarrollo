@@ -28,10 +28,13 @@
         <i class="fas fa-clipboard-list fa-fw me-3"></i><span>Proyectos</span>
       </a>
       <a href="#" class="list-group-item list-group-item-action py-2" id="casosLink">
-        <i class="fas fa-tasks fa-fw me-3"></i><span>Casos de Prueba</span>
+        <i class="fas fa-tasks fa-fw me-3"></i><span>Codigos y scripts</span>
       </a>
       <a href="#" class="list-group-item list-group-item-action py-2" id="planesLink">
         <i class="fas fa-folder-open fa-fw me-3"></i><span>Planes de Prueba</span>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-2" id="casosLink">
+        <i class="fas fa-tasks fa-fw me-3"></i><span>Pruebas unitarias</span>
       </a>
       <a href="#" class="list-group-item list-group-item-action py-2" id="defectosLink">
         <i class="fas fa-bug fa-fw me-3"></i><span>Defectos</span>
@@ -82,65 +85,6 @@
         <h1>Bienvenido al Dashboard de AndriQA</h1>
         <p>Selecciona una opción en el menú lateral para comenzar.</p>
 
-        <div id="kanban" class="row">
-          <!-- Columna: Pendientes -->
-          <div class="col-lg-2 col-md-6 mb-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-secondary text-white text-center">
-                <strong>Pendientes</strong>
-              </div>
-              <div class="card-body" id="pendientes">
-                <!-- Aquí se agregarán los proyectos automáticamente -->
-              </div>
-            </div>
-          </div>
-        
-          <!-- Columna: Por Hacer -->
-          <div class="col-lg-2 col-md-6 mb-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-primary text-white text-center">
-                <strong>Por Hacer</strong>
-              </div>
-              <div class="card-body" id="porHacer">
-                <!-- Aquí se agregarán los proyectos automáticamente -->
-              </div>
-            </div>
-          </div>
-        
-          <!-- Columna: En Progreso -->
-          <div class="col-lg-2 col-md-6 mb-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-warning text-white text-center">
-                <strong>En Progreso</strong>
-              </div>
-              <div class="card-body" id="enProgreso">
-                <!-- Aquí se agregarán los proyectos automáticamente -->
-              </div>
-            </div>
-          </div>
-        
-          <!-- Columna: Hecho -->
-          <div class="col-lg-2 col-md-6 mb-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-success text-white text-center">
-                <strong>Hecho</strong>
-              </div>
-              <div class="card-body" id="hecho">
-                <!-- Aquí se agregarán los proyectos automáticamente -->
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-
-        <div id="calendar" style="margin-top: 50px;"></div>
-        </div>
-
-        
-        
-
-
       </div>
     </div>
   </main>
@@ -149,7 +93,10 @@
   <!--   <script src="js/kanbanCalendar.js"></script>  -->
   <script src="js/themeToggler.js"></script>
   <script src="js/logoutHandler.js"></script>
+  <script src="js/ocultar_menu.js"></script>
+  <script src="js/dashboard.js"></script>
   <script src="js/kanban.js" defer></script>
+  <script src="kanbanCalendar.js" defer></script>
   <script src="js/calendar.js"></script>
   <script src="js/usuarios.js" defer></script>
   <script src="js/proyectos.js" defer></script>

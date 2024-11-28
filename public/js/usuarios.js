@@ -2,25 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const usuariosLink = document.getElementById('usuariosLink');
     const content = document.getElementById('content');
     const dashboardLink = document.getElementById('dashboardLink');
- 
-    // Función para mostrar el contenido predeterminado (Kanban + Calendario)
-    function mostrarDashboard() {
-        content.innerHTML = `
-<h1>Bienvenido al Dashboard de AndriQA</h1>
-<p>Selecciona una opción en el menú lateral para comenzar.</p>
-<div id="kanban" class="row">
-<!-- Aquí va el Kanban -->
-</div>
-<div id="calendar" style="margin-top: 50px;"></div>
-        `;
-    }
- 
-    // Mostrar el dashboard por defecto
-    dashboardLink.addEventListener('click', () => {
-        mostrarDashboard();
-    });
- 
-  
+
+    
 // Mostrar el módulo de usuarios al hacer clic
 usuariosLink.addEventListener('click', async () => {
     content.innerHTML = '<p>Cargando...</p>'; // Indicador de carga
