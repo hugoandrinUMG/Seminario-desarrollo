@@ -3,14 +3,14 @@ const Proyecto = require('../models/ProyectoModel');
 // Crear proyecto
 exports.crearProyecto = async (req, res) => {
     try {
-        const { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario } = req.body;
+        const { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado } = req.body;
 
         // Validar campos requeridos
-        if (!nombre || !descripcion || !fecha_inicio || !fecha_fin || !id_usuario) {
+        if (!nombre || !descripcion || !fecha_inicio || !fecha_fin || !id_usuario || !estado ) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
         }
 
-        const proyecto = await Proyecto.crearProyecto({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario });
+        const proyecto = await Proyecto.crearProyecto({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado });
         res.status(201).json(proyecto);
     } catch (error) {
         console.error('Error al crear el proyecto:', error);
@@ -47,10 +47,10 @@ exports.obtenerProyectoPorId = async (req, res) => {
 // Actualizar proyecto
 exports.actualizarProyecto = async (req, res) => {
     try {
-        const { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario } = req.body;
+        const { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado } = req.body;
 
         // Validar campos requeridos
-        if (!nombre || !descripcion || !fecha_inicio || !fecha_fin || !id_usuario) {
+        if (!nombre || !descripcion || !fecha_inicio || !fecha_fin || !id_usuario || !estado) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
         }
 
@@ -60,6 +60,7 @@ exports.actualizarProyecto = async (req, res) => {
             fecha_inicio,
             fecha_fin,
             id_usuario,
+            estado,
         });
 
         if (proyectoActualizado) {

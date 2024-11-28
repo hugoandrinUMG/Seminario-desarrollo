@@ -55,21 +55,24 @@ proyectosLink.addEventListener('click', async () => {
 <th>Acciones</th>
 </tr>
 </thead>
+
 <tbody id="proyectosTable">
-            ${proyectos.map(proyecto => `
+    ${proyectos.map(proyecto => `
 <tr data-id="${proyecto.id}">
 <td>${proyecto.id}</td>
 <td>${proyecto.nombre}</td>
 <td>${proyecto.descripcion}</td>
 <td>${formatFecha(proyecto.fecha_inicio)}</td>
 <td>${formatFecha(proyecto.fecha_fin)}</td>
+<td>${proyecto.estado || 'Sin Estado'}</td>
 <td>
 <button class="btn btn-warning btn-sm editProyectoBtn">Editar</button>
 <button class="btn btn-danger btn-sm deleteProyectoBtn">Eliminar</button>
 </td>
 </tr>
-            `).join('')}
+    `).join('')}
 </tbody>
+
 </table>
 <nav id="paginacionProyectos" class="mt-3"></nav>
 </div>
@@ -103,6 +106,7 @@ async function mostrarFormularioCrearProyecto() {
  
         const usuarios = await response.json();
  
+
         content.innerHTML = `
 <div class="container mt-5">
 <h2>Crear Proyecto</h2>
@@ -133,11 +137,23 @@ async function mostrarFormularioCrearProyecto() {
                 `).join('')}
 </select>
 </div>
+<div class="mb-3">
+<label for="estado" class="form-label">Estado</label>
+<select class="form-select" id="estado" required>
+<option value="Pendiente">Pendiente</option>
+<option value="Por Hacer">Por Hacer</option>
+<option value="En Progreso">En Progreso</option>
+<option value="Hecho">Hecho</option>
+</select>
+</div>
 <button type="submit" class="btn btn-success">Crear</button>
 <button type="button" class="btn btn-secondary" id="cancelarCrearProyecto">Cancelar</button>
 </form>
 </div>
-        `;
+`;
+
+
+
  
         document.getElementById('crearProyectoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -154,7 +170,7 @@ async function mostrarFormularioCrearProyecto() {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${localStorage.getItem('token')}`,
                     },
-                    body: JSON.stringify({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario }),
+                    body: JSON.stringify({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado }),
                 });
  
                 if (!response.ok) throw new Error('Error al crear el proyecto.');
@@ -216,16 +232,27 @@ async function mostrarFormularioEditarProyecto(event) {
 <label for="fecha_fin" class="form-label">Fecha de Fin</label>
 <input type="date" class="form-control" id="fecha_fin" value="${proyecto.fecha_fin.split('T')[0]}" required>
 </div>
+
 <div class="mb-3">
 <label for="id_usuario" class="form-label">Asignar a Usuario</label>
 <select class="form-select" id="id_usuario" required>
-                ${usuarios.map(usuario => `
+        ${usuarios.map(usuario => `
 <option value="${usuario.id}" ${usuario.id === proyecto.id_usuario ? 'selected' : ''}>
-                        ${usuario.nombre} (${usuario.rol})
+                ${usuario.nombre} (${usuario.rol})
 </option>
-                `).join('')}
+        `).join('')}
 </select>
 </div>
+<div class="mb-3">
+<label for="estado" class="form-label">Estado</label>
+<select class="form-select" id="estado" required>
+<option value="Pendiente" ${proyecto.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+<option value="Por Hacer" ${proyecto.estado === 'Por Hacer' ? 'selected' : ''}>Por Hacer</option>
+<option value="En Progreso" ${proyecto.estado === 'En Progreso' ? 'selected' : ''}>En Progreso</option>
+<option value="Hecho" ${proyecto.estado === 'Hecho' ? 'selected' : ''}>Hecho</option>
+</select>
+</div>
+
 <button type="submit" class="btn btn-success">Actualizar</button>
 <button type="button" class="btn btn-secondary" id="cancelarEditarProyecto">Cancelar</button>
 </form>
@@ -247,7 +274,7 @@ async function mostrarFormularioEditarProyecto(event) {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${localStorage.getItem('token')}`,
                     },
-                    body: JSON.stringify({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario }),
+                    body: JSON.stringify({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado }),
                 });
  
                 if (!response.ok) throw new Error('Error al actualizar el proyecto.');
@@ -383,22 +410,23 @@ async function actualizarKanban() {
         document.getElementById('hecho').innerHTML = '';
  
         // Distribuir proyectos en columnas
+        
         proyectos.forEach(proyecto => {
             const tarjeta = document.createElement('div');
             tarjeta.className = 'task';
             tarjeta.textContent = proyecto.nombre;
- 
-            // Clasificar por estado (agregar lógica si hay campo "estado" en la tabla)
+         
             if (proyecto.estado === 'Pendiente') {
                 document.getElementById('pendientes').appendChild(tarjeta);
             } else if (proyecto.estado === 'Por Hacer') {
                 document.getElementById('porHacer').appendChild(tarjeta);
             } else if (proyecto.estado === 'En Progreso') {
                 document.getElementById('enProgreso').appendChild(tarjeta);
-            } else {
+            } else if (proyecto.estado === 'Hecho') {
                 document.getElementById('hecho').appendChild(tarjeta);
             }
         });
+
     } catch (error) {
         console.error('Error al actualizar el tablero Kanban:', error);
     }

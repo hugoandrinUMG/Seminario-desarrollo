@@ -6,10 +6,10 @@ const ProyectoModel = {
     return result.rows;
   },
  
-  crearProyecto: async ({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario }) => {
+  crearProyecto: async ({ nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado }) => {
     const result = await pool.query(
-      'INSERT INTO proyectos (nombre, descripcion, fecha_inicio, fecha_fin, id_usuario) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [nombre, descripcion, fecha_inicio, fecha_fin, id_usuario]
+      'INSERT INTO proyectos (nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado]
     );
     return result.rows[0];
   },
@@ -20,10 +20,11 @@ const ProyectoModel = {
   },
  
   actualizarProyecto: async (id, datos) => {
-    const { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario } = datos;
+    const { nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado } = datos;
     const result = await pool.query(
-      'UPDATE proyectos SET nombre = $1, descripcion = $2, fecha_inicio = $3, fecha_fin = $4, id_usuario = $5 WHERE id = $6 RETURNING *',
-      [nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, id]
+      // Eliminar la coma extra antes de WHERE
+      'UPDATE proyectos SET nombre = $1, descripcion = $2, fecha_inicio = $3, fecha_fin = $4, id_usuario = $5, estado = $6 WHERE id = $7 RETURNING *',
+      [nombre, descripcion, fecha_inicio, fecha_fin, id_usuario, estado, id]
     );
     return result.rows[0];
   },
