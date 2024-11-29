@@ -20,7 +20,7 @@ const inicializarBaseDeDatos = require('./middlewares/dbInit'); // Se usa para a
 
 // Middleware para inicializar la base de datos (Agregar campos extra)
 (async () => {
-  await inicializarBaseDeDatos();
+ await inicializarBaseDeDatos();
 })();
 
 // Middleware

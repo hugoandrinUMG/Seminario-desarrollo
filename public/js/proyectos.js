@@ -43,6 +43,7 @@ proyectosLink.addEventListener('click', async () => {
 <div id="proyectosCrud" class="container mt-5">
 <h2>Gestión de Proyectos</h2>
 <button id="crearProyectoBtn" class="btn btn-primary mb-3">Crear Proyecto</button>
+<input type="text" id="buscarProyecto" class="form-control mb-3" placeholder="Buscar proyecto por nombre">
 <table class="table table-striped table-dark-mode">
 <thead>
 <tr>

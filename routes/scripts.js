@@ -1,20 +1,36 @@
 const express = require('express');
 const router = express.Router();
 const ScriptController = require('../controllers/ScriptController');
-
-// Ruta para obtener todos los scripts
-router.get('/', ScriptController.obtenerTodos);
-
-// Ruta para crear un script
-router.post('/', ScriptController.crearScript);
-
-// Ruta para obtener un script por ID
-router.get('/:id', ScriptController.obtenerPorId);
-
-// Ruta para actualizar un script por ID
-router.put('/:id', ScriptController.actualizarScript);
-
-// Ruta para eliminar un script por ID
-router.delete('/:id', ScriptController.eliminarScript);
-
+const authMiddleware = require('../middlewares/authMiddleware');
+ 
+// Ruta para obtener todos los scripts (acceso para todos los roles)
+router.get('/', authMiddleware.verifyToken, ScriptController.obtenerTodos);
+ 
+// Crear script (solo roles permitidos)
+router.post(
+  '/',
+  authMiddleware.verifyToken,
+  authMiddleware.verifyRole(['Administrador', 'Desarrollador', 'Arquitecto de Software']),
+  ScriptController.crearScript
+);
+ 
+// Actualizar script (solo roles permitidos)
+router.put(
+  '/:id',
+  authMiddleware.verifyToken,
+  authMiddleware.verifyRole(['Administrador', 'Desarrollador', 'Arquitecto de Software']),
+  ScriptController.actualizarScript
+);
+ 
+// Eliminar script (solo roles permitidos)
+router.delete(
+  '/:id',
+  authMiddleware.verifyToken,
+  authMiddleware.verifyRole(['Administrador', 'Desarrollador', 'Arquitecto de Software']),
+  ScriptController.eliminarScript
+);
+ 
+// Obtener script por ID (acceso para todos los roles)
+router.get('/:id', authMiddleware.verifyToken, ScriptController.obtenerPorId);
+ 
 module.exports = router;
