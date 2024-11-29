@@ -73,6 +73,7 @@ proyectosLink.addEventListener('click', async () => {
     `).join('')}
 </tbody>
 </table>
+<div id="paginacionProyectos" class="mt-3"></div> <!-- Contenedor de paginación -->
 </div>
         `;
  
@@ -106,7 +107,14 @@ proyectosLink.addEventListener('click', async () => {
         document.querySelectorAll('.deleteProyectoBtn').forEach(button => {
             button.addEventListener('click', eliminarProyecto);
         });
- 
+
+        document.querySelectorAll('table').forEach((table) => {
+            table.classList.add('table-dark-mode');
+          });
+          
+          // Agregar generación de paginación
+            generarPaginacionProyectos(proyectos);
+
     } catch (error) {
         content.innerHTML = `<p>${error.message}</p>`;
     }

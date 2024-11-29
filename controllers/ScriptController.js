@@ -62,46 +62,50 @@ const ScriptController = {
   // Actualizar un script
   actualizarScript: async (req, res) => {
     try {
-      const { id } = req.params;
-      const { nombre, descripcion, contenido, estado } = req.body;
- 
-      // Validar campos obligatorios
-      if (!nombre || !descripcion || !contenido || !estado) {
-        return res.status(400).json({
-          message: 'Los campos nombre, descripcion, contenido y estado son obligatorios.',
+        const { id } = req.params;
+        const { id_proyecto, id_usuario, nombre, descripcion, contenido } = req.body;
+
+        if (!id_proyecto || !id_usuario || !nombre || !descripcion || !contenido) {
+            return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+        }
+
+        const scriptActualizado = await ScriptModel.actualizarScript(id, {
+            id_proyecto,
+            id_usuario,
+            nombre,
+            descripcion,
+            contenido,
         });
-      }
- 
-      const scriptActualizado = await ScriptModel.actualizarScript(id, {
-        nombre,
-        descripcion,
-        contenido,
-        estado,
-      });
- 
-      if (!scriptActualizado) {
-        return res.status(404).json({ message: 'Script no encontrado para actualizar.' });
-      }
- 
-      res.status(200).json(scriptActualizado);
+
+        if (!scriptActualizado) {
+            return res.status(404).json({ message: 'Script no encontrado para actualizar.' });
+        }
+
+        res.status(200).json(scriptActualizado);
     } catch (error) {
-      console.error('Error al actualizar el script:', error);
-      res.status(500).json({ message: 'Error al actualizar el script.' });
+        console.error('Error al actualizar el script:', error);
+        res.status(500).json({ message: 'Error al actualizar el script.' });
     }
-  },
+},
  
   // Eliminar un script
   eliminarScript: async (req, res) => {
     try {
-      const { id } = req.params;
- 
-      await ScriptModel.eliminarScript(id);
-      res.status(200).json({ message: 'Script eliminado correctamente.' });
+        const { id } = req.params;
+
+        const script = await ScriptModel.obtenerPorId(id);
+        if (!script) {
+            return res.status(404).json({ message: 'Script no encontrado.' });
+        }
+
+        const eliminado = await ScriptModel.eliminarScript(id);
+        res.status(200).json({ message: 'Script eliminado correctamente.', eliminado });
     } catch (error) {
-      console.error('Error al eliminar el script:', error);
-      res.status(500).json({ message: 'Error al eliminar el script.' });
+        console.error('Error al eliminar el script:', error);
+        res.status(500).json({ message: 'Error al eliminar el script.' });
     }
-  },
+},
+
 };
  
 module.exports = ScriptController;

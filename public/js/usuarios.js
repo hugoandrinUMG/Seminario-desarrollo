@@ -75,6 +75,11 @@ usuariosLink.addEventListener('click', async () => {
             button.addEventListener('click', eliminarUsuario);
         });
         document.getElementById('buscarUsuario').addEventListener('input', buscarUsuario);
+
+        document.querySelectorAll('table').forEach((table) => {
+            table.classList.add('table-dark-mode');
+          });
+          
  
         // Generar paginación
         generarPaginacion(usuarios);

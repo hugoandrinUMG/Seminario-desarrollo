@@ -75,3 +75,21 @@ main {
 #content h1 {
   margin-bottom: 20px;
 }
+
+
+/* Estilo para modo oscuro de las tablas */
+.table.table-dark-mode {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border-color: var(--border-color-dark, #3c3c3c);
+}
+
+.table.table-dark-mode thead {
+  background-color: var(--sidebar-bg); /* Fondo dinámico */
+  color: var(--text-color); /* Texto dinámico */
+}
+
+.table.table-dark-mode tbody tr:hover {
+  background-color: var(--hover-bg); /* Hover dinámico */
+}
+
