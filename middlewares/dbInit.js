@@ -1,87 +1,86 @@
 const pool = require('../config/db');
- 
+
 async function inicializarBaseDeDatos() {
     try {
-        // Verificar y agregar/actualizar la columna "estado" en la tabla "proyectos"
-        const checkEstadoProyectos = `
+        // Verificar y agregar la columna "id_script" en la tabla "casos_prueba"
+        const checkIdScript = `
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = 'proyectos' AND column_name = 'estado';
+            WHERE table_name = 'casos_prueba' AND column_name = 'id_script';
         `;
-        const resultEstadoProyectos = await pool.query(checkEstadoProyectos);
- 
-        if (resultEstadoProyectos.rows.length === 0) {
-            // La columna no existe, agregarla
-            const alterEstadoProyectos = `
-                ALTER TABLE proyectos ADD COLUMN estado VARCHAR(50) DEFAULT 'Pendiente';
+        const resultIdScript = await pool.query(checkIdScript);
+
+        if (resultIdScript.rows.length === 0) {
+            const alterIdScript = `
+                ALTER TABLE casos_prueba
+                ADD COLUMN id_script INT REFERENCES scripts(id) ON DELETE SET NULL;
             `;
-            await pool.query(alterEstadoProyectos);
-            console.log('Columna "estado" añadida a la tabla "proyectos".');
+            await pool.query(alterIdScript);
+            console.log('Columna "id_script" añadida a la tabla "casos_prueba".');
         } else {
-            // La columna existe, verificar y cambiar el tamaño a 50
-            const alterEstadoSizeProyectos = `
-                ALTER TABLE proyectos ALTER COLUMN estado TYPE VARCHAR(50);
-            `;
-            await pool.query(alterEstadoSizeProyectos);
-            console.log('Columna "estado" en la tabla "proyectos" actualizada a VARCHAR(50).');
+            console.log('La columna "id_script" ya existe en la tabla "casos_prueba".');
         }
- 
-        // Verificar y agregar la columna "estado" en la tabla "scripts"
-        const checkEstadoScripts = `
+
+        // Verificar y agregar la columna "id_usuario" en la tabla "casos_prueba"
+        const checkIdUsuario = `
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = 'scripts' AND column_name = 'estado';
+            WHERE table_name = 'casos_prueba' AND column_name = 'id_usuario';
         `;
-        const resultEstadoScripts = await pool.query(checkEstadoScripts);
- 
-        if (resultEstadoScripts.rows.length === 0) {
-            const alterEstadoScripts = `
-                ALTER TABLE scripts ADD COLUMN estado VARCHAR(50) DEFAULT 'Primer version de codigo';
+        const resultIdUsuario = await pool.query(checkIdUsuario);
+
+        if (resultIdUsuario.rows.length === 0) {
+            const alterIdUsuario = `
+                ALTER TABLE casos_prueba
+                ADD COLUMN id_usuario INT REFERENCES usuarios(id) ON DELETE SET NULL;
             `;
-            await pool.query(alterEstadoScripts);
-            console.log('Columna "estado" añadida a la tabla "scripts".');
+            await pool.query(alterIdUsuario);
+            console.log('Columna "id_usuario" añadida a la tabla "casos_prueba".');
         } else {
-            console.log('La columna "estado" ya existe en la tabla "scripts".');
+            console.log('La columna "id_usuario" ya existe en la tabla "casos_prueba".');
         }
- 
-        // Verificar y agregar la columna "id_usuario_creador" en la tabla "scripts"
-        const checkIdUsuarioCreador = `
+
+        // Verificar y agregar la columna "pasos" en la tabla "casos_prueba"
+        const checkPasos = `
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = 'scripts' AND column_name = 'id_usuario_creador';
+            WHERE table_name = 'casos_prueba' AND column_name = 'pasos';
         `;
-        const resultIdUsuarioCreador = await pool.query(checkIdUsuarioCreador);
- 
-        if (resultIdUsuarioCreador.rows.length === 0) {
-            const alterIdUsuarioCreador = `
-                ALTER TABLE scripts ADD COLUMN id_usuario_creador INT REFERENCES usuarios(id);
+        const resultPasos = await pool.query(checkPasos);
+
+        if (resultPasos.rows.length === 0) {
+            const alterPasos = `
+                ALTER TABLE casos_prueba
+                ADD COLUMN pasos TEXT;
             `;
-            await pool.query(alterIdUsuarioCreador);
-            console.log('Columna "id_usuario_creador" añadida a la tabla "scripts".');
+            await pool.query(alterPasos);
+            console.log('Columna "pasos" añadida a la tabla "casos_prueba".');
         } else {
-            console.log('La columna "id_usuario_creador" ya existe en la tabla "scripts".');
+            console.log('La columna "pasos" ya existe en la tabla "casos_prueba".');
         }
- 
-        // Verificar y cambiar el tipo de la columna "contenido" en la tabla "scripts" a TEXT
-        const checkContenidoScripts = `
-            SELECT column_name, data_type
+
+        // Verificar y agregar la columna "resultado_esperado" en la tabla "casos_prueba"
+        const checkResultadoEsperado = `
+            SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = 'scripts' AND column_name = 'contenido';
+            WHERE table_name = 'casos_prueba' AND column_name = 'resultado_esperado';
         `;
-        const resultContenidoScripts = await pool.query(checkContenidoScripts);
- 
-        if (resultContenidoScripts.rows.length > 0 && resultContenidoScripts.rows[0].data_type !== 'text') {
-            const alterContenidoScripts = `
-                ALTER TABLE scripts ALTER COLUMN contenido TYPE TEXT;
+        const resultResultadoEsperado = await pool.query(checkResultadoEsperado);
+
+        if (resultResultadoEsperado.rows.length === 0) {
+            const alterResultadoEsperado = `
+                ALTER TABLE casos_prueba
+                ADD COLUMN resultado_esperado TEXT;
             `;
-            await pool.query(alterContenidoScripts);
-            console.log('Columna "contenido" en la tabla "scripts" actualizada a tipo TEXT.');
+            await pool.query(alterResultadoEsperado);
+            console.log('Columna "resultado_esperado" añadida a la tabla "casos_prueba".');
         } else {
-            console.log('La columna "contenido" ya es de tipo TEXT o no existe en la tabla "scripts".');
+            console.log('La columna "resultado_esperado" ya existe en la tabla "casos_prueba".');
         }
+
     } catch (error) {
         console.error('Error al inicializar la base de datos:', error.message);
     }
 }
- 
+
 module.exports = inicializarBaseDeDatos;

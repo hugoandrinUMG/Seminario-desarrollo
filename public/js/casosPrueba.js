@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             userRole = await obtenerRolUsuario();
 
-            const response = await fetch('/api/casosPrueba', {
+            const response = await fetch('/api/casos-prueba', {
                 method: 'GET',
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
 
             if (!response.ok) throw new Error('Error al cargar los casos de prueba.');
@@ -101,6 +101,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
 
+            // Event listener para el botón "Crear Caso".
+            if (document.getElementById('crearCasoBtn')) {
+                document.getElementById('crearCasoBtn').addEventListener('click', mostrarFormularioCrearCaso);
+            }
+
             // Reactivar botones de editar y eliminar.
             document.querySelectorAll('.editarCasoBtn').forEach((btn) => {
                 btn.addEventListener('click', (e) => {
@@ -131,163 +136,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             content.innerHTML = '<p>Error al cargar los casos de prueba.</p>';
         }
     });
-
-    async function mostrarFormularioEditarCaso(id) {
-        const token = localStorage.getItem('token');
-
-        try {
-            // Obtener datos del caso de prueba.
-            const casoResponse = await fetch(`/api/casosPrueba/${id}`, {
-                method: 'GET',
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (!casoResponse.ok) throw new Error('Error al cargar el caso de prueba.');
-
-            const caso = await casoResponse.json();
-
-            // Obtener proyectos, scripts y usuarios.
-            const [proyectosResponse, scriptsResponse, usuariosResponse] = await Promise.all([
-                fetch('/api/proyectos', { headers: { Authorization: `Bearer ${token}` } }),
-                fetch('/api/scripts', { headers: { Authorization: `Bearer ${token}` } }),
-                fetch('/api/usuarios', { headers: { Authorization: `Bearer ${token}` } }),
-            ]);
-
-            if (!proyectosResponse.ok || !scriptsResponse.ok || !usuariosResponse.ok) {
-                throw new Error('Error al cargar datos para editar el caso de prueba.');
-            }
-
-            const proyectos = await proyectosResponse.json();
-            const scripts = await scriptsResponse.json();
-            const usuarios = await usuariosResponse.json();
-
-            content.innerHTML = `
-                <div class="container mt-5">
-                    <h2>Editar Caso de Prueba</h2>
-                    <form id="editarCasoForm">
-                        <div class="mb-3">
-                            <label for="id_proyecto" class="form-label">Proyecto</label>
-                            <select class="form-select" id="id_proyecto" required>
-                                ${proyectos
-                                    .map(
-                                        (proyecto) =>
-                                            `<option value="${proyecto.id}" ${
-                                                proyecto.id === caso.id_proyecto ? 'selected' : ''
-                                            }>${proyecto.nombre}</option>`
-                                    )
-                                    .join('')}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="id_script" class="form-label">Script</label>
-                            <select class="form-select" id="id_script" required>
-                                ${scripts
-                                    .map(
-                                        (script) =>
-                                            `<option value="${script.id}" ${
-                                                script.id === caso.id_script ? 'selected' : ''
-                                            }>${script.nombre}</option>`
-                                    )
-                                    .join('')}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="id_usuario" class="form-label">Usuario</label>
-                            <select class="form-select" id="id_usuario" required>
-                                ${usuarios
-                                    .map(
-                                        (usuario) =>
-                                            `<option value="${usuario.id}" ${
-                                                usuario.id === caso.id_usuario ? 'selected' : ''
-                                            }>${usuario.nombre}</option>`
-                                    )
-                                    .join('')}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nombre" class="form-label">Nombre del Caso</label>
-                            <input type="text" class="form-control" id="nombre" value="${caso.nombre}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="descripcion" class="form-label">Descripción</label>
-                            <textarea class="form-control" id="descripcion" rows="3" required>${caso.descripcion}</textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="pasos" class="form-label">Pasos</label>
-                            <textarea class="form-control" id="pasos" rows="3" required>${caso.pasos}</textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="resultado_esperado" class="form-label">Resultado Esperado</label>
-                            <textarea class="form-control" id="resultado_esperado" rows="3" required>${caso.resultado_esperado}</textarea>
-                        </div>
-                        <button type="submit" class="btn btn-success">Actualizar</button>
-                        <button type="button" class="btn btn-secondary" id="cancelarEditarCaso">Cancelar</button>
-                    </form>
-                </div>
-            `;
-
-            document.getElementById('editarCasoForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const id_proyecto = document.getElementById('id_proyecto').value;
-                const id_script = document.getElementById('id_script').value;
-                const id_usuario = document.getElementById('id_usuario').value;
-                const nombre = document.getElementById('nombre').value;
-                const descripcion = document.getElementById('descripcion').value;
-                const pasos = document.getElementById('pasos').value;
-                const resultado_esperado = document.getElementById('resultado_esperado').value;
-
-                try {
-                    const response = await fetch(`/api/casosPrueba/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${token}`,
-                        },
-                        body: JSON.stringify({
-                            id_proyecto,
-                            id_script,
-                            id_usuario,
-                            nombre,
-                            descripcion,
-                            pasos,
-                            resultado_esperado,
-                        }),
-                    });
-
-                    if (!response.ok) throw new Error('Error al actualizar el caso de prueba.');
-                    alert('Caso de prueba actualizado exitosamente.');
-                    planesLink.click();
-                } catch (error) {
-                    alert('Error: ' + error.message);
-                }
-            });
-
-            document.getElementById('cancelarEditarCaso').addEventListener('click', () => {
-                planesLink.click();
-            });
-        } catch (error) {
-            alert('Error al cargar los datos para editar el caso de prueba: ' + error.message);
-        }
-    }
-
-    // Función para eliminar un caso.
-    async function eliminarCaso(id) {
-        if (!confirm('¿Está seguro de eliminar este caso de prueba?')) return;
-
-        try {
-            const response = await fetch(`/api/casosPrueba/${id}`, {
-                method: 'DELETE',
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-            });
-
-            if (!response.ok) throw new Error('Error al eliminar el caso de prueba.');
-            alert('Caso de prueba eliminado exitosamente.');
-            planesLink.click(); // Refresca la lista.
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    }
 
     // Función para buscar casos por nombre.
     function buscarCaso() {
@@ -324,30 +172,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const tabla = document.getElementById('casosTableBody');
         tabla.innerHTML = casosPagina
-            .map(
-                (caso) => `
-                    <tr data-id="${caso.id}">
-                        <td>${caso.nombre_proyecto || 'No asignado'}</td>
-                        <td>${caso.nombre_script || 'No asignado'}</td>
-                        <td>${caso.nombre_usuario || 'No asignado'}</td>
-                        <td>${caso.nombre}</td>
-                        <td>${caso.descripcion}</td>
-                        <td>${caso.pasos}</td>
-                        <td>${caso.resultado_esperado}</td>
-                        <td>
-                            ${
-                                ['Administrador', 'Desarrollador', 'Diseñador', 'Tester', 'Analista', 'Arquitecto de Software'].includes(userRole)
-                                    ? `
-                                        <button class="btn btn-primary btn-sm editarCasoBtn">Editar</button>
-                                        <button class="btn btn-danger btn-sm eliminarCasoBtn">Eliminar</button>
-                                      `
-                                    : ''
-                            }
-                        </td>
-                    </tr>
-                `
-            )
-            .join('');
+    .map(
+        (caso) => `
+            <tr data-id="${caso.id}">
+                <td>${caso.nombre_proyecto || 'No asignado'}</td>
+                <td>${caso.nombre_script || 'No asignado'}</td>
+                <td>${caso.nombre_usuario || 'No asignado'}</td>
+                <td>${caso.nombre || 'No asignado'}</td> <!-- Verificar aquí -->
+                <td>${caso.descripcion || 'No asignado'}</td>
+                <td>${caso.pasos || 'No asignado'}</td>
+                <td>${caso.resultado_esperado || 'No asignado'}</td>
+                <td>
+                    ${
+                        ['Administrador', 'Desarrollador', 'Diseñador', 'Tester', 'Analista', 'Arquitecto de Software'].includes(userRole)
+                            ? `
+                                <button class="btn btn-primary btn-sm editarCasoBtn">Editar</button>
+                                <button class="btn btn-danger btn-sm eliminarCasoBtn">Eliminar</button>
+                              `
+                            : ''
+                    }
+                </td>
+            </tr>
+        `
+    )
+    .join('');
+
 
         // Reactivar botones en la tabla.
         document.querySelectorAll('.editarCasoBtn').forEach((btn) => {
@@ -365,3 +214,276 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 });
+
+/////////////////////////////////////////////////////////////////////
+
+async function mostrarFormularioCrearCaso() {
+    try {
+        const token = localStorage.getItem('token');
+
+        // Obtener proyectos, scripts y usuarios.
+        const [proyectosResponse, scriptsResponse, usuariosResponse] = await Promise.all([
+            fetch('/api/proyectos', { headers: { Authorization: `Bearer ${token}` } }),
+            fetch('/api/scripts', { headers: { Authorization: `Bearer ${token}` } }),
+            fetch('/api/usuarios', { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+
+        if (!proyectosResponse.ok || !scriptsResponse.ok || !usuariosResponse.ok) {
+            throw new Error('Error al cargar datos para crear el caso de prueba.');
+        }
+
+        const proyectos = await proyectosResponse.json();
+        const scripts = await scriptsResponse.json();
+        const usuarios = await usuariosResponse.json();
+
+        content.innerHTML = `
+            <div class="container mt-5">
+                <h2>Crear Caso de Prueba</h2>
+                <form id="crearCasoForm">
+                    <div class="mb-3">
+                        <label for="id_proyecto" class="form-label">Proyecto</label>
+                        <select class="form-select" id="id_proyecto" required>
+                            ${proyectos.map((proyecto) => `<option value="${proyecto.id}">${proyecto.nombre}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_script" class="form-label">Script</label>
+                        <select class="form-select" id="id_script" required>
+                            ${scripts.map((script) => `<option value="${script.id}">${script.nombre}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_usuario" class="form-label">Usuario</label>
+                        <select class="form-select" id="id_usuario" required>
+                            ${usuarios.map((usuario) => `<option value="${usuario.id}">${usuario.nombre} (${usuario.rol})</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del Caso</label>
+                        <input type="text" class="form-control" id="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pasos" class="form-label">Pasos</label>
+                        <textarea class="form-control" id="pasos" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="resultado_esperado" class="form-label">Resultado Esperado</label>
+                        <textarea class="form-control" id="resultado_esperado" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Crear</button>
+                    <button type="button" class="btn btn-secondary" id="cancelarCrearCaso">Cancelar</button>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('crearCasoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id_proyecto = document.getElementById('id_proyecto').value;
+            const id_script = document.getElementById('id_script').value;
+            const id_usuario = document.getElementById('id_usuario').value;
+            const nombre = document.getElementById('nombre').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const pasos = document.getElementById('pasos').value;
+            const resultado_esperado = document.getElementById('resultado_esperado').value;
+
+            try {
+                const response = await fetch('/api/casos-prueba', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        id_proyecto,
+                        id_script,
+                        id_usuario,
+                        nombre,
+                        descripcion,
+                        pasos,
+                        resultado_esperado,
+                    }),
+                });
+
+                if (!response.ok) throw new Error('Error al crear el caso de prueba.');
+                alert('Caso de prueba creado exitosamente.');
+                planesLink.click(); // Regresa a la lista de casos.
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        document.getElementById('cancelarCrearCaso').addEventListener('click', () => {
+            planesLink.click(); // Regresa a la lista de casos.
+        });
+    } catch (error) {
+        alert('Error al cargar datos para crear el caso de prueba: ' + error.message);
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////
+
+async function mostrarFormularioEditarCaso(id) {
+    const token = localStorage.getItem('token');
+
+    try {
+        const casoResponse = await fetch(`/api/casos-prueba/${id}`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!casoResponse.ok) throw new Error('Error al cargar el caso de prueba.');
+
+        const caso = await casoResponse.json();
+
+        // Obtener proyectos, scripts y usuarios.
+        const [proyectosResponse, scriptsResponse, usuariosResponse] = await Promise.all([
+            fetch('/api/proyectos', { headers: { Authorization: `Bearer ${token}` } }),
+            fetch('/api/scripts', { headers: { Authorization: `Bearer ${token}` } }),
+            fetch('/api/usuarios', { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+
+        if (!proyectosResponse.ok || !scriptsResponse.ok || !usuariosResponse.ok) {
+            throw new Error('Error al cargar datos para editar el caso de prueba.');
+        }
+
+        const proyectos = await proyectosResponse.json();
+        const scripts = await scriptsResponse.json();
+        const usuarios = await usuariosResponse.json();
+
+        content.innerHTML = `
+            <div class="container mt-5">
+                <h2>Editar Caso de Prueba</h2>
+                <form id="editarCasoForm">
+                    <div class="mb-3">
+                        <label for="id_proyecto" class="form-label">Proyecto</label>
+                        <select class="form-select" id="id_proyecto" required>
+                            ${proyectos
+                                .map(
+                                    (proyecto) =>
+                                        `<option value="${proyecto.id}" ${
+                                            proyecto.id === caso.id_proyecto ? 'selected' : ''
+                                        }>${proyecto.nombre}</option>`
+                                )
+                                .join('')}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_script" class="form-label">Script</label>
+                        <select class="form-select" id="id_script" required>
+                            ${scripts
+                                .map(
+                                    (script) =>
+                                        `<option value="${script.id}" ${
+                                            script.id === caso.id_script ? 'selected' : ''
+                                        }>${script.nombre}</option>`
+                                )
+                                .join('')}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_usuario" class="form-label">Usuario</label>
+                        <select class="form-select" id="id_usuario" required>
+                            ${usuarios
+                                .map(
+                                    (usuario) =>
+                                        `<option value="${usuario.id}" ${
+                                            usuario.id === caso.id_usuario ? 'selected' : ''
+                                        }>${usuario.nombre}</option>`
+                                )
+                                .join('')}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del Caso</label>
+                        <input type="text" class="form-control" id="nombre" value="${caso.nombre || ''}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" rows="3" required>${caso.descripcion}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pasos" class="form-label">Pasos</label>
+                        <textarea class="form-control" id="pasos" rows="3" required>${caso.pasos}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="resultado_esperado" class="form-label">Resultado Esperado</label>
+                        <textarea class="form-control" id="resultado_esperado" rows="3" required>${caso.resultado_esperado}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Actualizar</button>
+                    <button type="button" class="btn btn-secondary" id="cancelarEditarCaso">Cancelar</button>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('editarCasoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id_proyecto = document.getElementById('id_proyecto').value;
+            const id_script = document.getElementById('id_script').value;
+            const id_usuario = document.getElementById('id_usuario').value;
+            const nombre = document.getElementById('nombre').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const pasos = document.getElementById('pasos').value;
+            const resultado_esperado = document.getElementById('resultado_esperado').value;
+
+            try {
+                const response = await fetch(`/api/casos-prueba/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        id_proyecto,
+                        id_script,
+                        id_usuario,
+                        nombre,
+                        descripcion,
+                        pasos,
+                        resultado_esperado,
+                    }),
+                });
+
+                if (!response.ok) throw new Error('Error al actualizar el caso de prueba.');
+                alert('Caso de prueba actualizado exitosamente.');
+                planesLink.click();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        document.getElementById('cancelarEditarCaso').addEventListener('click', () => {
+            planesLink.click();
+        });
+    } catch (error) {
+        alert('Error al cargar los datos para editar el caso de prueba: ' + error.message);
+    }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+async function eliminarCaso(id) {
+    if (!confirm('¿Está seguro de eliminar este caso de prueba?')) return;
+
+    try {
+        const response = await fetch(`/api/casos-prueba/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+
+        if (!response.ok) throw new Error('Error al eliminar el caso de prueba.');
+        alert('Caso de prueba eliminado exitosamente.');
+        planesLink.click(); // Refresca la lista.
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
