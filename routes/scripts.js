@@ -4,7 +4,7 @@ const ScriptController = require('../controllers/ScriptController');
 const authMiddleware = require('../middlewares/authMiddleware');
  
 // Ruta para obtener todos los scripts (acceso para todos los roles)
-router.get('/', authMiddleware.verifyToken, ScriptController.obtenerTodos);
+router.get('/',  ScriptController.obtenerTodos);
  
 // Crear script (solo roles permitidos)
 router.post(
@@ -31,6 +31,6 @@ router.delete(
 );
  
 // Obtener script por ID (acceso para todos los roles)
-router.get('/:id', authMiddleware.verifyToken, ScriptController.obtenerPorId);
+router.get('/:id', ScriptController.obtenerPorId);
  
 module.exports = router;

@@ -56,7 +56,16 @@ const ScriptModel = {
       WHERE scripts.id = $1;
     `;
     const result = await pool.query(query, [id]);
+    //return result.rows[0];
+
+    if (result.rows.length === 0) {
+      console.log('No se encontró el script con id:', id);
+      return null;  // Si no se encuentra el script, retornamos null
+    }
+  
+    console.log('Script encontrado:', result.rows[0]);  // Verifica que el campo 'contenido' esté presente
     return result.rows[0];
+
   },
 
   actualizarScript: async (id, datos) => {

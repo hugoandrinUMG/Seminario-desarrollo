@@ -106,7 +106,8 @@ app.use('/api/documentos', documentoRoutes);
 
 
 // Usar las rutas para ejecuciones de prueba
-app.use('/api/ejecuciones-prueba', ejecucionesPruebaRoutes);
+
+app.use('/api/ejecucionesPrueba', ejecucionesPruebaRoutes);
 
 
 
